@@ -309,7 +309,7 @@ static void imlib_b_and_line_op(image_t *img, int line, void *other, void *data,
 
 void imlib_b_and(image_t *img, const char *path, image_t *other, int scalar, image_t *mask)
 {
-    //imlib_image_operation(img, path, other, scalar, imlib_b_and_line_op, mask);
+    imlib_image_operation(img, path, other, scalar, imlib_b_and_line_op, mask);
 }
 
 static void imlib_b_nand_line_op(image_t *img, int line, void *other, void *data, bool vflipped)
@@ -379,7 +379,7 @@ static void imlib_b_nand_line_op(image_t *img, int line, void *other, void *data
 
 void imlib_b_nand(image_t *img, const char *path, image_t *other, int scalar, image_t *mask)
 {
-    //imlib_image_operation(img, path, other, scalar, imlib_b_nand_line_op, mask);
+    imlib_image_operation(img, path, other, scalar, imlib_b_nand_line_op, mask);
 }
 
 static void imlib_b_or_line_op(image_t *img, int line, void *other, void *data, bool vflipped)
@@ -449,7 +449,7 @@ static void imlib_b_or_line_op(image_t *img, int line, void *other, void *data, 
 
 void imlib_b_or(image_t *img, const char *path, image_t *other, int scalar, image_t *mask)
 {
-    //imlib_image_operation(img, path, other, scalar, imlib_b_or_line_op, mask);
+    imlib_image_operation(img, path, other, scalar, imlib_b_or_line_op, mask);
 }
 
 static void imlib_b_nor_line_op(image_t *img, int line, void *other, void *data, bool vflipped)
@@ -519,7 +519,7 @@ static void imlib_b_nor_line_op(image_t *img, int line, void *other, void *data,
 
 void imlib_b_nor(image_t *img, const char *path, image_t *other, int scalar, image_t *mask)
 {
-    //imlib_image_operation(img, path, other, scalar,imlib_b_nor_line_op,  mask);
+    imlib_image_operation(img, path, other, scalar,imlib_b_nor_line_op,  mask);
 }
 
 static void imlib_b_xor_line_op(image_t *img, int line, void *other, void *data, bool vflipped)
@@ -589,7 +589,7 @@ static void imlib_b_xor_line_op(image_t *img, int line, void *other, void *data,
 
 void imlib_b_xor(image_t *img, const char *path, image_t *other, int scalar, image_t *mask)
 {
-    //imlib_image_operation(img, path, other, scalar, imlib_b_xor_line_op, mask);
+    imlib_image_operation(img, path, other, scalar, imlib_b_xor_line_op, mask);
 }
 
 static void imlib_b_xnor_line_op(image_t *img, int line, void *other, void *data, bool vflipped)
@@ -659,7 +659,7 @@ static void imlib_b_xnor_line_op(image_t *img, int line, void *other, void *data
 
 void imlib_b_xnor(image_t *img, const char *path, image_t *other, int scalar, image_t *mask)
 {
-    //imlib_image_operation(img, path, other, scalar, imlib_b_xnor_line_op, mask);
+    imlib_image_operation(img, path, other, scalar, imlib_b_xnor_line_op, mask);
 }
 
 static void imlib_erode_dilate(image_t *img, int ksize, int threshold, int e_or_d, image_t *mask)

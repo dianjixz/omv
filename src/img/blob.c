@@ -4,6 +4,8 @@
  */
 
 #include "imlib.h"
+#include <stdio.h>
+
 // #include "printf.h"
 
 #ifndef OMV_MINIMUM
@@ -14,11 +16,48 @@ typedef struct xylf
 }
 xylf_t;
 
+
+
+// bool rectangle_overlap(rectangle_t *ptr0, rectangle_t *ptr1)
+// {
+//     int x0 = ptr0->x;
+//     int y0 = ptr0->y;
+//     int w0 = ptr0->w;
+//     int h0 = ptr0->h;
+//     int x1 = ptr1->x;
+//     int y1 = ptr1->y;
+//     int w1 = ptr1->w;
+//     int h1 = ptr1->h;
+//     return (x0 < (x1 + w1)) && (y0 < (y1 + h1)) && (x1 < (x0 + w0)) && (y1 < (y0 + h0));
+// }
+
+// void rectangle_united(rectangle_t *dst, rectangle_t *src)
+// {
+//     int leftX = IM_MIN(dst->x, src->x);
+//     int topY = IM_MIN(dst->y, src->y);
+//     int rightX = IM_MAX(dst->x + dst->w, src->x + src->w);
+//     int bottomY = IM_MAX(dst->y + dst->h, src->y + src->h);
+//     dst->x = leftX;
+//     dst->y = topY;
+//     dst->w = rightX - leftX;
+//     dst->h = bottomY - topY;
+// }
+
+
+
+
+
+
+//原函数的定义
+// void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int x_stride, unsigned int y_stride,
+//                      list_t *thresholds, bool invert, unsigned int area_threshold, unsigned int pixels_threshold,
+//                      bool merge, int margin,
+//                      bool (*threshold_cb)(void*,find_blobs_list_lnk_data_t*), void *threshold_cb_arg,
+//                      bool (*merge_cb)(void*,find_blobs_list_lnk_data_t*,find_blobs_list_lnk_data_t*), void *merge_cb_arg)
+//现在的函数定义，去掉回调函数
 void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int x_stride, unsigned int y_stride,
                      list_t *thresholds, bool invert, unsigned int area_threshold, unsigned int pixels_threshold,
-                     bool merge, int margin,
-                     bool (*threshold_cb)(void*,find_blobs_list_lnk_data_t*), void *threshold_cb_arg,
-                     bool (*merge_cb)(void*,find_blobs_list_lnk_data_t*,find_blobs_list_lnk_data_t*), void *merge_cb_arg)
+                     bool merge, int margin)
 {
     bitmap_t bitmap; // Same size as the image so we don't have to translate.
     bitmap_alloc(&bitmap, ptr->w * ptr->h);
@@ -33,7 +72,7 @@ void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
     // mp_printf();
     // static int k = 0;
     // k++;
-    // mp_printf(&mp_plat_print, "nihao ,can you see me one?\r\n");
+    // MSGLOG("nihao ,can you see me one?\r\n");
 
 
 
@@ -204,8 +243,7 @@ void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
                             lnk_blob.code = 1 << code;
                             lnk_blob.count = 1;
 
-                            if (((lnk_blob.rect.w * lnk_blob.rect.h) >= area_threshold) && (lnk_blob.pixels >= pixels_threshold)
-                            && ((threshold_cb_arg == NULL) || threshold_cb(threshold_cb_arg, &lnk_blob))) {
+                            if (((lnk_blob.rect.w * lnk_blob.rect.h) >= area_threshold) && (lnk_blob.pixels >= pixels_threshold)) {
                                 list_push_back(out, &lnk_blob);
                             }
 
@@ -375,8 +413,7 @@ void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
                             lnk_blob.code = 1 << code;
                             lnk_blob.count = 1;
 
-                            if (((lnk_blob.rect.w * lnk_blob.rect.h) >= area_threshold) && (lnk_blob.pixels >= pixels_threshold)
-                            && ((threshold_cb_arg == NULL) || threshold_cb(threshold_cb_arg, &lnk_blob))) {
+                            if (((lnk_blob.rect.w * lnk_blob.rect.h) >= area_threshold) && (lnk_blob.pixels >= pixels_threshold) ) {
                                 list_push_back(out, &lnk_blob);
                             }
 
@@ -388,12 +425,41 @@ void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
                 break;
             }
             case IMAGE_BPP_RGB565: {
+                // printf("nihao:13\r\n");
                 for (int y = roi->y, yy = roi->y + roi->h; y < yy; y += y_stride) {
+                    
                     uint16_t *row_ptr = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(ptr, y);
                     size_t row_index = BITMAP_COMPUTE_ROW_INDEX(ptr, y);
-                    for (int x = roi->x + (y % x_stride), xx = roi->x + roi->w; x < xx; x += x_stride) {
-                        if ((!bitmap_bit_get(&bitmap, BITMAP_COMPUTE_INDEX(row_index, x)))
-                        && COLOR_THRESHOLD_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row_ptr, x), &lnk_data, invert)) {
+                    
+                    // printf("row_ptr rgb565 %X\r\n", *row_ptr);
+
+                    // printf("l:%d,a:%d,b%d\r\n",lab_table(*row_ptr * 3),lab_table((*row_ptr * 3) + 1),lab_table((*row_ptr * 3) + 2));
+                    for (int x = roi->x + (y % x_stride), xx = roi->x + roi->w; x < xx; x += x_stride)
+                     {
+
+
+                            //  uint8_t _l = COLOR_RGB565_TO_L(_pixel); \
+                            //  int8_t _a = COLOR_RGB565_TO_A(_pixel); \
+                            // int8_t _b = COLOR_RGB565_TO_B(_pixel); \
+
+
+                
+            //   uint8_t _l = lab_table((row_ptr) * 3);
+            //   int8_t _a = lab_table(((row_ptr) * 3) + 1);
+            //   int8_t _b = lab_table(((row_ptr) * 3) + 2);
+                        //  if(!bitmap_bit_get(&bitmap, BITMAP_COMPUTE_INDEX(row_index, x))
+                        //  {
+                        //      printf("nihao:15\r\n");
+                        //      if(COLOR_THRESHOLD_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row_ptr, x), &lnk_data, invert))
+                        //      {
+
+                        //         printf("nihao:16\r\n");
+
+                        // printf("nihao:16\r\n");
+
+                        if ((!bitmap_bit_get(&bitmap, BITMAP_COMPUTE_INDEX(row_index, x))) && 
+                                            COLOR_THRESHOLD_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row_ptr, x), &lnk_data, invert)) {
+                            
                             int old_x = x;
                             int old_y = y;
 
@@ -546,14 +612,22 @@ void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
                             lnk_blob.code = 1 << code;
                             lnk_blob.count = 1;
 
-                            if (((lnk_blob.rect.w * lnk_blob.rect.h) >= area_threshold) && (lnk_blob.pixels >= pixels_threshold)
-                            && ((threshold_cb_arg == NULL) || threshold_cb(threshold_cb_arg, &lnk_blob))) {
+                            // printf("find_blobs_list_lnk_data_t %d %d %d %d\r\n",blob_x1, blob_y1, blob_x2 - blob_x1,blob_y2 - blob_y1);
+
+                            if (((lnk_blob.rect.w * lnk_blob.rect.h) >= area_threshold) && (lnk_blob.pixels >= pixels_threshold)) {
                                 list_push_back(out, &lnk_blob);
                             }
 
                             x = old_x;
                             y = old_y;
                         }
+                    
+                    
+                    //  }          ///new add
+                    
+                    
+                    
+                    
                     }
                 }
                 break;
@@ -590,8 +664,7 @@ void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
                     temp.w = IM_MAX(IM_MIN(tmp_blob.rect.w + (margin * 2), INT16_MAX), 0);
                     temp.h = IM_MAX(IM_MIN(tmp_blob.rect.h + (margin * 2), INT16_MAX), 0);
 
-                    if (rectangle_overlap(&(lnk_blob.rect), &temp)
-                    && ((merge_cb_arg == NULL) || merge_cb(merge_cb_arg, &lnk_blob, &tmp_blob))) {
+                    if (rectangle_overlap(&(lnk_blob.rect), &temp)) {
                         rectangle_united(&(lnk_blob.rect), &(tmp_blob.rect));
                         lnk_blob.centroid.x = ((lnk_blob.centroid.x * lnk_blob.pixels) + (tmp_blob.centroid.x * tmp_blob.pixels)) / (lnk_blob.pixels + tmp_blob.pixels);
                         lnk_blob.centroid.y = ((lnk_blob.centroid.y * lnk_blob.pixels) + (tmp_blob.centroid.y * tmp_blob.pixels)) / (lnk_blob.pixels + tmp_blob.pixels);
@@ -619,345 +692,345 @@ void imlib_find_blobs(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
     }
 }
 
-// size_t imlib_flood_fill_int(image_t *out, image_t *img, int x, int y,
-//                           int seed_threshold, int floating_threshold,
-//                           flood_fill_call_back_t cb, void *data)
-// {
-//     lifo_t lifo;
-//     size_t lifo_len;
-//     lifo_alloc_all(&lifo, &lifo_len, sizeof(xylf_t));
-// 	size_t count = 0;
+size_t imlib_flood_fill_int(image_t *out, image_t *img, int x, int y,
+                          int seed_threshold, int floating_threshold,
+                          flood_fill_call_back_t cb, void *data)
+{
+    lifo_t lifo;
+    size_t lifo_len;
+    lifo_alloc_all(&lifo, &lifo_len, sizeof(xylf_t));
+	size_t count = 0;
 
-//     switch(img->bpp) {
-//         case IMAGE_BPP_BINARY: {
-//             for(int seed_pixel = IMAGE_GET_BINARY_PIXEL(img, x, y);;) {
-//                 int left = x, right = x;
-//                 uint32_t *row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y);
-//                 uint32_t *out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y);
+    switch(img->bpp) {
+        case IMAGE_BPP_BINARY: {
+            for(int seed_pixel = IMAGE_GET_BINARY_PIXEL(img, x, y);;) {
+                int left = x, right = x;
+                uint32_t *row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y);
+                uint32_t *out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y);
 
-//                 while ((left > 0)
-//                 && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, left - 1))
-//                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, left - 1), seed_pixel, seed_threshold)
-//                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, left - 1),
-//                                       IMAGE_GET_BINARY_PIXEL_FAST(row, left), floating_threshold)) {
-//                     left--;
-//                 }
+                while ((left > 0)
+                && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, left - 1))
+                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, left - 1), seed_pixel, seed_threshold)
+                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, left - 1),
+                                      IMAGE_GET_BINARY_PIXEL_FAST(row, left), floating_threshold)) {
+                    left--;
+                }
 
-//                 while ((right < (img->w - 1))
-//                 && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, right + 1))
-//                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, right + 1), seed_pixel, seed_threshold)
-//                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, right + 1),
-//                                       IMAGE_GET_BINARY_PIXEL_FAST(row, right), floating_threshold)) {
-//                     right++;
-//                 }
+                while ((right < (img->w - 1))
+                && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, right + 1))
+                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, right + 1), seed_pixel, seed_threshold)
+                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, right + 1),
+                                      IMAGE_GET_BINARY_PIXEL_FAST(row, right), floating_threshold)) {
+                    right++;
+                }
 
-//                 for (int i = left; i <= right; i++) {
-//                     IMAGE_SET_BINARY_PIXEL_FAST(out_row, i);
-//                 }
+                for (int i = left; i <= right; i++) {
+                    IMAGE_SET_BINARY_PIXEL_FAST(out_row, i);
+                }
 
-//                 bool break_out = false;
-//                 for(;;) {
-//                     if (lifo_size(&lifo) < lifo_len) {
-//                         uint32_t *old_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y);
+                bool break_out = false;
+                for(;;) {
+                    if (lifo_size(&lifo) < lifo_len) {
+                        uint32_t *old_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y);
 
-//                         if (y > 0) {
-//                             row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y - 1);
-//                             out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y - 1);
+                        if (y > 0) {
+                            row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y - 1);
+                            out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y - 1);
 
-//                             bool recurse = false;
-//                             for (int i = left; i <= right; i++) {
-//                                 if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
-//                                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
-//                                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i),
-//                                                       IMAGE_GET_BINARY_PIXEL_FAST(old_row, i), floating_threshold)) {
-//                                     xylf_t context;
-//                                     context.x = x;
-//                                     context.y = y;
-//                                     context.l = left;
-//                                     context.r = right;
-//                                     lifo_enqueue(&lifo, &context);
-//                                     x = i;
-//                                     y = y - 1;
-//                                     recurse = true;
-//                                     break;
-//                                 }
-//                             }
-//                             if (recurse) {
-//                                 break;
-//                             }
-//                         }
+                            bool recurse = false;
+                            for (int i = left; i <= right; i++) {
+                                if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
+                                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
+                                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i),
+                                                      IMAGE_GET_BINARY_PIXEL_FAST(old_row, i), floating_threshold)) {
+                                    xylf_t context;
+                                    context.x = x;
+                                    context.y = y;
+                                    context.l = left;
+                                    context.r = right;
+                                    lifo_enqueue(&lifo, &context);
+                                    x = i;
+                                    y = y - 1;
+                                    recurse = true;
+                                    break;
+                                }
+                            }
+                            if (recurse) {
+                                break;
+                            }
+                        }
 
-//                         if (y < (img->h - 1)) {
-//                             row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y + 1);
-//                             out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y + 1);
+                        if (y < (img->h - 1)) {
+                            row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(img, y + 1);
+                            out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y + 1);
 
-//                             bool recurse = false;
-//                             for (int i = left; i <= right; i++) {
-//                                 if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
-//                                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
-//                                 && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i),
-//                                                       IMAGE_GET_BINARY_PIXEL_FAST(old_row, i), floating_threshold)) {
-//                                     xylf_t context;
-//                                     context.x = x;
-//                                     context.y = y;
-//                                     context.l = left;
-//                                     context.r = right;
-//                                     lifo_enqueue(&lifo, &context);
-//                                     x = i;
-//                                     y = y + 1;
-//                                     recurse = true;
-//                                     break;
-//                                 }
-//                             }
-//                             if (recurse) {
-//                                 break;
-//                             }
-//                         }
-//                     }
+                            bool recurse = false;
+                            for (int i = left; i <= right; i++) {
+                                if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
+                                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
+                                && COLOR_BOUND_BINARY(IMAGE_GET_BINARY_PIXEL_FAST(row, i),
+                                                      IMAGE_GET_BINARY_PIXEL_FAST(old_row, i), floating_threshold)) {
+                                    xylf_t context;
+                                    context.x = x;
+                                    context.y = y;
+                                    context.l = left;
+                                    context.r = right;
+                                    lifo_enqueue(&lifo, &context);
+                                    x = i;
+                                    y = y + 1;
+                                    recurse = true;
+                                    break;
+                                }
+                            }
+                            if (recurse) {
+                                break;
+                            }
+                        }
+                    }
 
-//                     if (cb) cb(img, y, left, right, data);
+                    if (cb) cb(img, y, left, right, data);
 
-//                     if (!lifo_size(&lifo)) {
-//                         break_out = true;
-//                         break;
-//                     }
+                    if (!lifo_size(&lifo)) {
+                        break_out = true;
+                        break;
+                    }
 
-//                     xylf_t context;
-//                     lifo_dequeue(&lifo, &context);
-//                     x = context.x;
-//                     y = context.y;
-//                     left = context.l;
-//                     right = context.r;
-//                 }
+                    xylf_t context;
+                    lifo_dequeue(&lifo, &context);
+                    x = context.x;
+                    y = context.y;
+                    left = context.l;
+                    right = context.r;
+                }
 
-//                 if (break_out) {
-//                     break;
-//                 }
-//             }
-//             break;
-//         }
-//         case IMAGE_BPP_GRAYSCALE: {
-//             for(int seed_pixel = IMAGE_GET_GRAYSCALE_PIXEL(img, x, y);;) {
-//                 int left = x, right = x;
-//                 uint8_t *row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y);
-//                 uint32_t *out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y);
+                if (break_out) {
+                    break;
+                }
+            }
+            break;
+        }
+        case IMAGE_BPP_GRAYSCALE: {
+            for(int seed_pixel = IMAGE_GET_GRAYSCALE_PIXEL(img, x, y);;) {
+                int left = x, right = x;
+                uint8_t *row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y);
+                uint32_t *out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y);
 
-//                 while ((left > 0)
-//                 && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, left - 1))
-//                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, left - 1), seed_pixel, seed_threshold)
-//                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, left - 1),
-//                                          IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, left), floating_threshold)) {
-//                     left--;
-//                 }
+                while ((left > 0)
+                && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, left - 1))
+                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, left - 1), seed_pixel, seed_threshold)
+                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, left - 1),
+                                         IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, left), floating_threshold)) {
+                    left--;
+                }
 
-//                 while ((right < (img->w - 1))
-//                 && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, right + 1))
-//                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, right + 1), seed_pixel, seed_threshold)
-//                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, right + 1),
-//                                          IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, right), floating_threshold)) {
-//                     right++;
-//                 }
+                while ((right < (img->w - 1))
+                && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, right + 1))
+                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, right + 1), seed_pixel, seed_threshold)
+                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, right + 1),
+                                         IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, right), floating_threshold)) {
+                    right++;
+                }
 
-//                 for (int i = left; i <= right; i++) {
-//                     IMAGE_SET_BINARY_PIXEL_FAST(out_row, i);
-//                 }
-// 				count += (right-left+1);
+                for (int i = left; i <= right; i++) {
+                    IMAGE_SET_BINARY_PIXEL_FAST(out_row, i);
+                }
+				count += (right-left+1);
 
-//                 bool break_out = false;
-//                 for(;;) {
-//                     if (lifo_size(&lifo) < lifo_len) {
-//                         uint8_t *old_row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y);
+                bool break_out = false;
+                for(;;) {
+                    if (lifo_size(&lifo) < lifo_len) {
+                        uint8_t *old_row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y);
 
-//                         if (y > 0) {
-//                             row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y - 1);
-//                             out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y - 1);
+                        if (y > 0) {
+                            row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y - 1);
+                            out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y - 1);
 
-//                             bool recurse = false;
-//                             for (int i = left; i <= right; i++) {
-//                                 if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
-//                                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
-//                                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i),
-//                                                          IMAGE_GET_GRAYSCALE_PIXEL_FAST(old_row, i), floating_threshold)) {
-//                                     xylf_t context;
-//                                     context.x = x;
-//                                     context.y = y;
-//                                     context.l = left;
-//                                     context.r = right;
-//                                     lifo_enqueue(&lifo, &context);
-//                                     x = i;
-//                                     y = y - 1;
-//                                     recurse = true;
-//                                     break;
-//                                 }
-//                             }
-//                             if (recurse) {
-//                                 break;
-//                             }
-//                         }
+                            bool recurse = false;
+                            for (int i = left; i <= right; i++) {
+                                if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
+                                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
+                                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i),
+                                                         IMAGE_GET_GRAYSCALE_PIXEL_FAST(old_row, i), floating_threshold)) {
+                                    xylf_t context;
+                                    context.x = x;
+                                    context.y = y;
+                                    context.l = left;
+                                    context.r = right;
+                                    lifo_enqueue(&lifo, &context);
+                                    x = i;
+                                    y = y - 1;
+                                    recurse = true;
+                                    break;
+                                }
+                            }
+                            if (recurse) {
+                                break;
+                            }
+                        }
 
-//                         if (y < (img->h - 1)) {
-//                             row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y + 1);
-//                             out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y + 1);
+                        if (y < (img->h - 1)) {
+                            row = IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(img, y + 1);
+                            out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y + 1);
 
-//                             bool recurse = false;
-//                             for (int i = left; i <= right; i++) {
-//                                 if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
-//                                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
-//                                 && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i),
-//                                                          IMAGE_GET_GRAYSCALE_PIXEL_FAST(old_row, i), floating_threshold)) {
-//                                     xylf_t context;
-//                                     context.x = x;
-//                                     context.y = y;
-//                                     context.l = left;
-//                                     context.r = right;
-//                                     lifo_enqueue(&lifo, &context);
-//                                     x = i;
-//                                     y = y + 1;
-//                                     recurse = true;
-//                                     break;
-//                                 }
-//                             }
-//                             if (recurse) {
-//                                 break;
-//                             }
-//                         }
-//                     }
+                            bool recurse = false;
+                            for (int i = left; i <= right; i++) {
+                                if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
+                                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
+                                && COLOR_BOUND_GRAYSCALE(IMAGE_GET_GRAYSCALE_PIXEL_FAST(row, i),
+                                                         IMAGE_GET_GRAYSCALE_PIXEL_FAST(old_row, i), floating_threshold)) {
+                                    xylf_t context;
+                                    context.x = x;
+                                    context.y = y;
+                                    context.l = left;
+                                    context.r = right;
+                                    lifo_enqueue(&lifo, &context);
+                                    x = i;
+                                    y = y + 1;
+                                    recurse = true;
+                                    break;
+                                }
+                            }
+                            if (recurse) {
+                                break;
+                            }
+                        }
+                    }
 
-//                     if (cb) cb(img, y, left, right, data);
+                    if (cb) cb(img, y, left, right, data);
 
-//                     if (!lifo_size(&lifo)) {
-//                         break_out = true;
-//                         break;
-//                     }
+                    if (!lifo_size(&lifo)) {
+                        break_out = true;
+                        break;
+                    }
 
-//                     xylf_t context;
-//                     lifo_dequeue(&lifo, &context);
-//                     x = context.x;
-//                     y = context.y;
-//                     left = context.l;
-//                     right = context.r;
-//                 }
+                    xylf_t context;
+                    lifo_dequeue(&lifo, &context);
+                    x = context.x;
+                    y = context.y;
+                    left = context.l;
+                    right = context.r;
+                }
 
-//                 if (break_out) {
-//                     break;
-//                 }
-//             }
-//             break;
-//         }
-//         case IMAGE_BPP_RGB565: {
-//             for(int seed_pixel = IMAGE_GET_RGB565_PIXEL(img, x, y);;) {
-//                 int left = x, right = x;
-//                 uint16_t *row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y);
-//                 uint32_t *out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y);
+                if (break_out) {
+                    break;
+                }
+            }
+            break;
+        }
+        case IMAGE_BPP_RGB565: {
+            for(int seed_pixel = IMAGE_GET_RGB565_PIXEL(img, x, y);;) {
+                int left = x, right = x;
+                uint16_t *row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y);
+                uint32_t *out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y);
 
-//                 while ((left > 0)
-//                 && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, left - 1))
-//                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, left - 1), seed_pixel, seed_threshold)
-//                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, left - 1),
-//                                       IMAGE_GET_RGB565_PIXEL_FAST(row, left), floating_threshold)) {
-//                     left--;
-//                 }
+                while ((left > 0)
+                && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, left - 1))
+                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, left - 1), seed_pixel, seed_threshold)
+                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, left - 1),
+                                      IMAGE_GET_RGB565_PIXEL_FAST(row, left), floating_threshold)) {
+                    left--;
+                }
 
-//                 while ((right < (img->w - 1))
-//                 && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, right + 1))
-//                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, right + 1), seed_pixel, seed_threshold)
-//                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, right + 1),
-//                                       IMAGE_GET_RGB565_PIXEL_FAST(row, right), floating_threshold)) {
-//                     right++;
-//                 }
+                while ((right < (img->w - 1))
+                && (!IMAGE_GET_BINARY_PIXEL_FAST(out_row, right + 1))
+                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, right + 1), seed_pixel, seed_threshold)
+                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, right + 1),
+                                      IMAGE_GET_RGB565_PIXEL_FAST(row, right), floating_threshold)) {
+                    right++;
+                }
 
-//                 for (int i = left; i <= right; i++) {
-//                     IMAGE_SET_BINARY_PIXEL_FAST(out_row, i);
-//                 }
+                for (int i = left; i <= right; i++) {
+                    IMAGE_SET_BINARY_PIXEL_FAST(out_row, i);
+                }
 
-//                 bool break_out = false;
-//                 for(;;) {
-//                     if (lifo_size(&lifo) < lifo_len) {
-//                         uint16_t *old_row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y);
+                bool break_out = false;
+                for(;;) {
+                    if (lifo_size(&lifo) < lifo_len) {
+                        uint16_t *old_row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y);
 
-//                         if (y > 0) {
-//                             row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y - 1);
-//                             out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y - 1);
+                        if (y > 0) {
+                            row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y - 1);
+                            out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y - 1);
 
-//                             bool recurse = false;
-//                             for (int i = left; i <= right; i++) {
-//                                 if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
-//                                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
-//                                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i),
-//                                                       IMAGE_GET_RGB565_PIXEL_FAST(old_row, i), floating_threshold)) {
-//                                     xylf_t context;
-//                                     context.x = x;
-//                                     context.y = y;
-//                                     context.l = left;
-//                                     context.r = right;
-//                                     lifo_enqueue(&lifo, &context);
-//                                     x = i;
-//                                     y = y - 1;
-//                                     recurse = true;
-//                                     break;
-//                                 }
-//                             }
-//                             if (recurse) {
-//                                 break;
-//                             }
-//                         }
+                            bool recurse = false;
+                            for (int i = left; i <= right; i++) {
+                                if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
+                                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
+                                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i),
+                                                      IMAGE_GET_RGB565_PIXEL_FAST(old_row, i), floating_threshold)) {
+                                    xylf_t context;
+                                    context.x = x;
+                                    context.y = y;
+                                    context.l = left;
+                                    context.r = right;
+                                    lifo_enqueue(&lifo, &context);
+                                    x = i;
+                                    y = y - 1;
+                                    recurse = true;
+                                    break;
+                                }
+                            }
+                            if (recurse) {
+                                break;
+                            }
+                        }
 
-//                         if (y < (img->h - 1)) {
-//                             row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y + 1);
-//                             out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y + 1);
+                        if (y < (img->h - 1)) {
+                            row = IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(img, y + 1);
+                            out_row = IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(out, y + 1);
 
-//                             bool recurse = false;
-//                             for (int i = left; i <= right; i++) {
-//                                 if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
-//                                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
-//                                 && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i),
-//                                                       IMAGE_GET_RGB565_PIXEL_FAST(old_row, i), floating_threshold)) {
-//                                     xylf_t context;
-//                                     context.x = x;
-//                                     context.y = y;
-//                                     context.l = left;
-//                                     context.r = right;
-//                                     lifo_enqueue(&lifo, &context);
-//                                     x = i;
-//                                     y = y + 1;
-//                                     recurse = true;
-//                                     break;
-//                                 }
-//                             }
-//                             if (recurse) {
-//                                 break;
-//                             }
-//                         }
-//                     }
+                            bool recurse = false;
+                            for (int i = left; i <= right; i++) {
+                                if ((!IMAGE_GET_BINARY_PIXEL_FAST(out_row, i))
+                                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i), seed_pixel, seed_threshold)
+                                && COLOR_BOUND_RGB565(IMAGE_GET_RGB565_PIXEL_FAST(row, i),
+                                                      IMAGE_GET_RGB565_PIXEL_FAST(old_row, i), floating_threshold)) {
+                                    xylf_t context;
+                                    context.x = x;
+                                    context.y = y;
+                                    context.l = left;
+                                    context.r = right;
+                                    lifo_enqueue(&lifo, &context);
+                                    x = i;
+                                    y = y + 1;
+                                    recurse = true;
+                                    break;
+                                }
+                            }
+                            if (recurse) {
+                                break;
+                            }
+                        }
+                    }
 
-//                     if (cb) cb(img, y, left, right, data);
+                    if (cb) cb(img, y, left, right, data);
 
-//                     if (!lifo_size(&lifo)) {
-//                         break_out = true;
-//                         break;
-//                     }
+                    if (!lifo_size(&lifo)) {
+                        break_out = true;
+                        break;
+                    }
 
-//                     xylf_t context;
-//                     lifo_dequeue(&lifo, &context);
-//                     x = context.x;
-//                     y = context.y;
-//                     left = context.l;
-//                     right = context.r;
-//                 }
+                    xylf_t context;
+                    lifo_dequeue(&lifo, &context);
+                    x = context.x;
+                    y = context.y;
+                    left = context.l;
+                    right = context.r;
+                }
 
-//                 if (break_out) {
-//                     break;
-//                 }
-//             }
-//             break;
-//         }
-//         default: {
-//             break;
-//         }
-//     }
+                if (break_out) {
+                    break;
+                }
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 
-//     lifo_free(&lifo);
-// 	return count;
-// }
+    lifo_free(&lifo);
+	return count;
+}
 
 #endif //OMV_MINIMUM

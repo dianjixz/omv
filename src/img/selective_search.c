@@ -39,11 +39,11 @@ typedef struct {
     uint16_t b;
 } __attribute__((aligned(8)))edge;
 
-inline int min (int a, int b) { return (a < b) ? a : b; }
-inline int max (int a, int b) { return (a > b) ? a : b; }
-inline float minf (float a, float b) { return (a < b) ? a : b; }
-inline float maxf (float a, float b) { return (a > b) ? a : b; }
-extern uint32_t rng_randint(uint32_t min, uint32_t max);
+inline static int min (int a, int b) { return (a < b) ? a : b; }
+inline static int max (int a, int b) { return (a > b) ? a : b; }
+inline static float minf (float a, float b) { return (a < b) ? a : b; }
+inline static float maxf (float a, float b) { return (a > b) ? a : b; }
+// extern uint32_t rng_randint(uint32_t min, uint32_t max);
 
 static universe *universe_create(int elements)
 {
@@ -377,7 +377,7 @@ array_t *imlib_selective_search(image_t *src, float t, int min_size, float a1, f
         }
 
         if (best_i == -1) {
-            mp_printf(&mp_plat_print, "failed to build tree\n");
+            MSGLOG("failed to build tree\n");
             break;
         }
 
@@ -443,4 +443,8 @@ array_t *imlib_selective_search(image_t *src, float t, int min_size, float a1, f
     fb_free_all();
     return proposals;
 }
+
+
+
+
 #endif //IMLIB_ENABLE_SELECTIVE_SEARCH

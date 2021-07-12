@@ -154,7 +154,7 @@ void HAL_JPEG_DataReadyCallback (JPEG_HandleTypeDef *hjpeg, uint8_t *pDataOut, u
 
 void HAL_JPEG_ErrorCallback(JPEG_HandleTypeDef *hjpeg)
 {
-    mp_printf(&mp_plat_print, "JPEG decode/encode error\n");
+    MSGLOG("JPEG decode/encode error\n");
 }
 
 bool jpeg_compress(image_t *src, image_t *dst, int quality, bool realloc)
@@ -217,7 +217,7 @@ bool jpeg_compress(image_t *src, image_t *dst, int quality, bool realloc)
     dst->bpp = jpeg_enc.out_size;
 
 #if (TIME_JPEG==1)
-    mp_printf(&mp_plat_print, "time: %lums\n", HAL_GetTick() - start);
+    MSGLOG("time: %lums\n", HAL_GetTick() - start);
 #endif
 
     HAL_JPEG_DeInit(&JPEG_Handle);

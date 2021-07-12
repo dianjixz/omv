@@ -9,7 +9,7 @@
  */
 #include <stdio.h>
 //#include <arm_math.h>
-#include "ff.h"
+// #include "ff.h"
 #include "vfs_wrapper.h"
 #include "xalloc.h"
 #include "imlib.h"

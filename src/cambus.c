@@ -44,7 +44,7 @@ int sccb_i2c_init(int8_t i2c, uint8_t pin_clk, uint8_t pin_sda, uint8_t gpio_clk
     {
         if (i2c > 2 || i2c < 0)
             return -1;
-        mp_printf(&mp_plat_print, "init i2c:%d freq:%d\r\n", i2c, freq);
+        MSGLOG("init i2c:%d freq:%d\r\n", i2c, freq);
         fpioa_set_function(pin_clk, FUNC_I2C0_SCLK + i2c * 2);
         fpioa_set_function(pin_sda, FUNC_I2C0_SDA + i2c * 2);
         maix_i2c_init((i2c_device_number_t)i2c, 7, freq);
@@ -229,7 +229,7 @@ int cambus_scan_gc0328(void)
     sccb_i2c_read_byte(i2c_device, GC0328_ADDR, 0xF0, sccb_reg_width, &id, 10);
     if (id != 0x9d)
     {
-        // mp_printf(&mp_plat_print, "error gc0328 detect, ret id is 0x%x\r\n", id);
+        // MSGLOG("error gc0328 detect, ret id is 0x%x\r\n", id);
         return 0;
     }
     return id;
@@ -246,7 +246,7 @@ int cambus_scan_gc2145(void)
     id = (id_h<<8) | id_l;
     if (id != 0x2145)
     {
-        // mp_printf(&mp_plat_print, "error gc2145 detect, ret id is 0x%x\r\n", id);
+        // MSGLOG("error gc2145 detect, ret id is 0x%x\r\n", id);
         return 0;
     }
     return id;
@@ -257,7 +257,7 @@ int cambus_scan_mt9d111(void)
     uint16_t id = mt9d111_read_id(i2c_device);
     if (id != MT9D111_ID_CODE)
     {
-        // mp_printf(&mp_plat_print, "error mt9d111 detect, ret id is 0x%x\r\n", id);
+        // MSGLOG("error mt9d111 detect, ret id is 0x%x\r\n", id);
         return 0;
     }
     return id;

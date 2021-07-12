@@ -6,13 +6,28 @@
  * Interface for using extra frame buffer RAM as a stack.
  *
  */
-#include <mp.h>
+// #include <mp.h>
 #include "fb_alloc.h"
 #include "framebuffer.h"
-#include "omv_boardconfig.h"
+// #include "omv_boardconfig.h"
 #include "stdlib.h"
-#include "printf.h"
-#include "sipeed_mem.h"
+// #include <stdint.h>
+#include <stdio.h>
+#include <stdbool.h>
+// #include "printf.h"
+// #include "sipeed_mem.h"
+
+#define NORETURN __attribute__((noreturn))
+#ifndef OMV_MINIMUM
+#define OMV_FB_ALLOC_SIZE 700 * 1024 // minimum fb alloc size
+#define FB_MAX_ALLOC_TIMES    100
+
+#else  //OMV_MINIMUM
+
+#define OMV_FB_ALLOC_SIZE 300 * 1024 // minimum fb alloc size
+#define FB_MAX_ALLOC_TIMES    50
+
+#endif //OMV_MINIMUM
 
 
 typedef struct 
@@ -30,12 +45,12 @@ static uint8_t m_mark_max_now = 0;
 
 NORETURN void fb_alloc_fail()
 {
-    sprintf(stderr,"Out of Memory! Please reduce the resolution of the image you are running this algorithm on to bypass this issue!\r\n"));
+    sprintf(stderr,"Out of Memory! Please reduce the resolution of the image you are running this algorithm on to bypass this issue!\r\n");
 }
 
 NORETURN void fb_alloc_fail_2()
 {
-    sprintf(stderr,"Too many fb_alloc! no space save! try again or reduce img size!\r\n"));
+    sprintf(stderr,"Too many fb_alloc! no space save! try again or reduce img size!\r\n");
 }
 
 void fb_alloc_init_once()
@@ -50,8 +65,9 @@ void fb_alloc_init0()
 
 uint64_t fb_avail()
 {
-    size_t size = get_free_heap_size2();
-    return  size > OMV_FB_ALLOC_SIZE ? OMV_FB_ALLOC_SIZE : size;
+    // size_t size = get_free_heap_size2();
+    // return  size > OMV_FB_ALLOC_SIZE ? OMV_FB_ALLOC_SIZE : size;
+    return OMV_FB_ALLOC_SIZE;
 }
 
 void fb_alloc_mark()

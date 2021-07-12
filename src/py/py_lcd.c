@@ -140,7 +140,7 @@ void py_lcd_load_config(lcd_para_t *lcd_cfg)
         PY_LCD_CHECK_CONFIG(lcd_type, &lcd_cfg->lcd_type);
         PY_LCD_CHECK_CONFIG(oct, &lcd_cfg->oct);
 
-        // mp_printf(&mp_plat_print, "[%s]: rst=%d, dcx=%d, ss=%d, clk=%d\r\n",
+        // MSGLOG("[%s]: rst=%d, dcx=%d, ss=%d, clk=%d\r\n",
         //           __func__, lcd_cfg->rst_pin, lcd_cfg->dcx_pin, lcd_cfg->cs_pin, lcd_cfg->clk_pin);
 
     }
@@ -236,7 +236,7 @@ static mp_obj_t py_lcd_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
             fpioa_set_function(lcd_para.cs_pin, FUNC_SPI0_SS0 + LCD_SPI_SLAVE_SELECT);
             fpioa_set_function(lcd_para.clk_pin, FUNC_SPI0_SCLK);
 
-            // mp_printf(&mp_plat_print, "[%d]: lcd_para.offset_x1=%d, offset_y1=%d, offset_x2=%d, offset_y2=%d,
+            // MSGLOG("[%d]: lcd_para.offset_x1=%d, offset_y1=%d, offset_x2=%d, offset_y2=%d,
             //     width_curr=%d, height_curr=%d, invert=%d, lcd_type=%d\r\n", __LINE__,
             //     lcd_para.offset_h0, lcd_para.offset_h1, lcd_para.offset_w0, lcd_para.offset_w1,
             //     width_curr, height_curr, invert, lcd_para.lcd_type);
@@ -311,7 +311,7 @@ static mp_obj_t py_lcd_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
             fpioa_set_function(lcd_para.cs_pin, FUNC_SPI0_SS0 + LCD_SPI_SLAVE_SELECT);
             fpioa_set_function(lcd_para.clk_pin, FUNC_SPI0_SCLK);
 
-            // mp_printf(&mp_plat_print, "DEV_CONVERTER, type: %d rst: %d, %d, %d, %d\n",lcd_para.lcd_type, lcd_para.rst_pin,
+            // MSGLOG("DEV_CONVERTER, type: %d rst: %d, %d, %d, %d\n",lcd_para.lcd_type, lcd_para.rst_pin,
             // lcd_para.dcx_pin,lcd_para.cs_pin, lcd_para.clk_pin);
 
             lcd = &lcd_rgb;

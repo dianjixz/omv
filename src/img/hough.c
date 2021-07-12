@@ -4,11 +4,15 @@
  */
 
 #include "imlib.h"
-#include "encoding.h"
+// #include "encoding.h"
 
 typedef int (*dual_func_t)(int);
-extern volatile dual_func_t dual_func;
-extern void* arg_list[16];
+// extern volatile dual_func_t dual_func;
+volatile dual_func_t dual_func;
+
+
+//extern void* arg_list[16];
+void* arg_list[16];
 //extern corelock_t lock; 
 #define CORE_NUM 2
 
@@ -207,7 +211,7 @@ void imlib_find_lines(list_t *out, image_t *ptr, rectangle_t *roi, unsigned int 
                       uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
 {
     int r_diag_len, r_diag_len_div, theta_size, r_size, hough_divide = 1; // divides theta and rho accumulators
-_t0=read_cycle();
+// _t0=read_cycle();
     for (;;) { // shrink to fit...
         r_diag_len = fast_roundf(fast_sqrtf((roi->w * roi->w) + (roi->h * roi->h)));
         r_diag_len_div = (r_diag_len + hough_divide - 1) / hough_divide;

@@ -6,19 +6,24 @@
  * Memory allocation functions.
  *
  */
-#include <mp.h>
+//#include <mp.h>
+#include<stdlib.h>
+#include<stdio.h>
 #include "xalloc.h"
+
+#ifndef NORETURN
+#define NORETURN __attribute__((noreturn))
+#endif
 
 NORETURN static void xalloc_fail()
 {
-    nlr_raise(mp_obj_new_exception_msg(&mp_type_MemoryError, "Out of normal MicroPython Heap Memory!"
-        " Please reduce the resolution of the image you are running this algorithm on to bypass this issue!"));
+    sprintf(stderr, "Out of normal MicroPython Heap Memory! Please reduce the resolution of the image you are running this algorithm on to bypass this issue!\r\n");
 }
 
 // returns null pointer without error if size==0
 void *xalloc(uint32_t size)
 {
-    void *mem = gc_alloc(size, false);
+    void *mem = malloc(size);
     if (size && (mem == NULL)) {
         xalloc_fail();
     }
@@ -28,13 +33,13 @@ void *xalloc(uint32_t size)
 // returns null pointer without error if size==0
 void *xalloc_try_alloc(uint32_t size)
 {
-    return gc_alloc(size, false);
+    return malloc(size);
 }
 
 // returns null pointer without error if size==0
 void *xalloc0(uint32_t size)
 {
-    void *mem = gc_alloc(size, false);
+    void *mem = malloc(size);
     if (size && (mem == NULL)) {
         xalloc_fail();
     }
@@ -45,7 +50,7 @@ void *xalloc0(uint32_t size)
 // returns without error if mem==null
 void xfree(void *mem)
 {
-    gc_free(mem);
+    free(mem);
 }
 
 // returns null pointer without error if size==0
@@ -53,7 +58,7 @@ void xfree(void *mem)
 // frees if mem!=null and size==0
 void *xrealloc(void *mem, uint32_t size)
 {
-    mem = gc_realloc(mem, size, true);
+    mem = realloc(mem, size);
     if (size && (mem == NULL)) {
         xalloc_fail();
     }

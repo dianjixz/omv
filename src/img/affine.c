@@ -178,7 +178,6 @@ int imlib_affine_ai(image_t* src_img, image_t* dst_img, float* TT)
 
 int imlib_affine(image_t* src_img, image_t* dst_img, float* T)
 {
-    #include "printf.h"
-	mp_printf(&mp_plat_print,"not support yet, please use imlib_affine_ai, then ai_to_pix\r\n");
+	MSGLOG("not support yet, please use imlib_affine_ai, then ai_to_pix\r\n");
 	return -1;
 }

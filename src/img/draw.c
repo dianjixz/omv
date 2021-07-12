@@ -3,7 +3,7 @@
  * This work is licensed under the MIT license, see the file LICENSE for details.
  */
 
-#include "font.h"
+// #include "font.h"
 #include "imlib.h"
 
 // Get pixel (handles boundary check and image type check).
@@ -121,7 +121,7 @@ void imlib_draw_rectangle(image_t *img, int rx, int ry, int rw, int rh, int c, i
     }
 }
 
-// https://stackoverflow.com/questions/27755514/circle-with-thickness-drawing-algorithm
+// // https://stackoverflow.com/questions/27755514/circle-with-thickness-drawing-algorithm
 void imlib_draw_circle(image_t *img, int cx, int cy, int r, int c, int thickness, bool fill)
 {
     if (fill) {

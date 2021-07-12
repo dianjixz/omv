@@ -6,10 +6,11 @@
  * Dynamic array.
  *
  */
-#include <mp.h>
-#include <stackctrl.h>
+// #include <mp.h>
+// #include <stackctrl.h>
 #include "xalloc.h"
 #include "array.h"
+#include <stdio.h>>
 #define ARRAY_INIT_SIZE (4) // Size of one GC block.
 
 void array_alloc(array_t **a, array_dtor_t dtor)
@@ -124,7 +125,7 @@ void array_resize(array_t *array, int num)
 // see micropython quicksort (objlist.c -> mp_quicksort)
 static void quicksort(void **head, void **tail, array_comp_t comp)
 {
-    MP_STACK_CHECK();
+    // MP_STACK_CHECK();
     while (head < tail) {
         void **h = head - 1;
         void **t = tail;

@@ -3,8 +3,8 @@
 
 #include "stdint.h"
 #include "stdbool.h"
-#include "py/mpconfig.h"
-#include "vfs_internal.h"
+// #include "py/mpconfig.h"
+// #include "vfs_internal.h"
 
 int file_write_open_raise(mp_obj_t* fp, const char *path);
 int file_read_open_raise(mp_obj_t* fp, const char *path);

@@ -89,7 +89,7 @@ unsigned char pjpeg_need_bytes_callback(unsigned char* pBuf, unsigned char buf_s
       ret = vfs_internal_read(file->file, pBuf, n, &err);
       if(err!=0 || ret!=n)
       {
-         mp_printf(&mp_plat_print, "read err:%d, n:%d, ret:%ld\n", err, n, ret);
+         MSGLOG("read err:%d, n:%d, ret:%ld\n", err, n, ret);
          return PJPG_STREAM_READ_ERROR;
       }
    }
@@ -151,10 +151,10 @@ uint8 *pjpeg_load_from_file(mp_obj_t file, uint8_t* buf, uint32_t buf_len, int *
    status = pjpeg_decode_init(&image_info, pjpeg_need_bytes_callback, &f_info, (unsigned char)reduce);
    if (status)
    {
-      mp_printf(&mp_plat_print, "pjpeg_decode_init() failed with status %u\n", status);
+      MSGLOG("pjpeg_decode_init() failed with status %u\n", status);
       if (status == PJPG_UNSUPPORTED_MODE)
       {
-         mp_printf(&mp_plat_print, "Progressive JPEG files are not supported.\n");
+         MSGLOG("Progressive JPEG files are not supported.\n");
       }
       return NULL;
    }
@@ -177,7 +177,7 @@ uint8 *pjpeg_load_from_file(mp_obj_t file, uint8_t* buf, uint32_t buf_len, int *
    {
       if( (row_pitch * decoded_height) > (max_width * max_height * OMV_INIT_BPP) )
       {
-         mp_printf(&mp_plat_print, "[MaixPy] image: max supported size: %dx%x\n", MAIN_FB()->w_max, MAIN_FB()->h_max);
+         MSGLOG("[MaixPy] image: max supported size: %dx%x\n", MAIN_FB()->w_max, MAIN_FB()->h_max);
          *err = MP_EINVAL;
          return NULL;
       }
@@ -200,7 +200,7 @@ uint8 *pjpeg_load_from_file(mp_obj_t file, uint8_t* buf, uint32_t buf_len, int *
       {
          if (status != PJPG_NO_MORE_BLOCKS)
          {
-            mp_printf(&mp_plat_print, "pjpeg_decode_mcu() failed with status %u\n", status);
+            MSGLOG("pjpeg_decode_mcu() failed with status %u\n", status);
             xfree(pImage);
             *err = EPERM;
             return NULL;
@@ -464,11 +464,11 @@ int picojpeg_util_read(image_t* img, mp_obj_t file, uint8_t* buf, uint32_t buf_l
    
    if (!img->data)
    {
-      mp_printf(&mp_plat_print, "Failed loading source image!\n");
+      MSGLOG("Failed loading source image!\n");
       return err;
    }
 
-   // mp_printf(&mp_plat_print, "Width: %d, Height: %d, Comps: %d\n", width, height, comps);
+   // MSGLOG("Width: %d, Height: %d, Comps: %d\n", width, height, comps);
    
    // switch (scan_type)
    // {
@@ -478,7 +478,7 @@ int picojpeg_util_read(image_t* img, mp_obj_t file, uint8_t* buf, uint32_t buf_l
    //    case PJPG_YH1V2: p = "H1V2"; break;
    //    case PJPG_YH2V2: p = "H2V2"; break;
    // }
-   // mp_printf(&mp_plat_print, "Scan type: %s\n", p);
+   // MSGLOG("Scan type: %s\n", p);
    img->w = width;
    img->h = height;
    if(scan_type == PJPG_GRAYSCALE)

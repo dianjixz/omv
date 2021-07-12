@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "mutex.h"
 #include "imlib_config.h"
-#include "global_config.h"
+// #include "global_config.h"
 #define SENSOR_BUFFER_NUM 2
 
 typedef struct framebuffer {

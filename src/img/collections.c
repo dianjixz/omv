@@ -305,11 +305,9 @@ void list_pop_front(list_t *ptr, void *data)
 void list_pop_back(list_t *ptr, void *data)
 {
     list_lnk_t *tmp = ptr->tail_ptr;
-
     if (data) {
         memcpy(data, tmp->data, ptr->data_len);
     }
-
     tmp->prev_ptr->next_ptr = NULL;
     ptr->tail_ptr = tmp->prev_ptr;
     ptr->size -= 1;

@@ -7,20 +7,22 @@
  *
  */
 #include <stdlib.h>
-#include <mp.h>
+#include <stdio.h>
+// #include <mp.h>
 #include "font.h"
 #include "array.h"
-#include "vfs_wrapper.h"
+// #include "vfs_wrapper.h"
 #include "imlib.h"
 #include "common.h"
-#include "omv_boardconfig.h"
-#include "sipeed_conv.h"
-#include "picojpeg_util.h"
+// #include "omv_boardconfig.h"
+// #include "sipeed_conv.h"
+// #include "picojpeg_util.h"
 #include "framebuffer.h"
 
 /////////////////
 // Point Stuff //
 /////////////////
+
 
 void point_init(point_t *ptr, int x, int y)
 {
@@ -294,7 +296,7 @@ void imlib_lab_to_rgb(simple_color_t *lab, simple_color_t *rgb)
     rgb->green = IM_MAX(IM_MIN(fast_roundf(g_lin * 255), 255), 0);
     rgb->blue  = IM_MAX(IM_MIN(fast_roundf(b_lin * 255), 255), 0);
 }
-#include "printf.h"
+// #include "printf.h"
 void imlib_rgb_to_grayscale(simple_color_t *rgb, simple_color_t *grayscale)
 {
     float r_lin = xyz_table[rgb->red];
@@ -303,7 +305,7 @@ void imlib_rgb_to_grayscale(simple_color_t *rgb, simple_color_t *grayscale)
     float y = ((r_lin * 0.2126f) + (g_lin * 0.7152f) + (b_lin * 0.0722f)) / 100.0f;
     y = (y>0.0031308f) ? ((1.055f*powf(y, 0.416666f))-0.055f) : (y*12.92f);
     grayscale->G = IM_MAX(IM_MIN(fast_roundf(y * 255), 255), 0);
-    mp_printf(&mp_plat_print, "nihao ,can you see me three?\r\n");
+    // MSGLOG("nihao ,can you see me three?\r\n");
 }
 
 // Just copy settings back.
@@ -325,7 +327,7 @@ ALWAYS_INLINE uint16_t imlib_yuv_to_rgb(uint8_t y, int8_t u, int8_t v)
 void imlib_bayer_to_rgb565(image_t *img, int w, int h, int xoffs, int yoffs, uint16_t *rgbbuf)
 {
     int r, g, b;
-    mp_printf(&mp_plat_print, "nihao ,can you see me to_rgb565 six?\r\n");
+    // MSGLOG("nihao ,can you see me to_rgb565 six?\r\n");
     image_t out;
     for (int y=yoffs; y<yoffs+h; y++) {
         for (int x=xoffs; x<xoffs+w; x++) {
@@ -410,7 +412,8 @@ static save_image_format_t imblib_parse_extension(image_t *img, const char *path
                &&  ((p[-3] == 'b') || (p[-3] == 'B'))
                &&  ((p[-4] == '.') || (p[-4] == '.'))) {
                     if (IM_IS_JPEG(img) || IM_IS_BAYER(img)) {
-                        nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not BMP!"));
+                        MSGLOG("Image is not BMP!");
+                        // nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not BMP!"));
                     }
                     return FORMAT_BMP;
         } else if (((p[-1] == 'm') || (p[-1] == 'M'))
@@ -418,7 +421,8 @@ static save_image_format_t imblib_parse_extension(image_t *img, const char *path
                &&  ((p[-3] == 'p') || (p[-3] == 'P'))
                &&  ((p[-4] == '.') || (p[-4] == '.'))) {
                     if (!IM_IS_RGB565(img)) {
-                        nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not PPM!"));
+                        MSGLOG("Image is not PPM!");
+                        // nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not PPM!"));
                     }
                     return FORMAT_PNM;
         } else if (((p[-1] == 'm') || (p[-1] == 'M'))
@@ -426,7 +430,8 @@ static save_image_format_t imblib_parse_extension(image_t *img, const char *path
                &&  ((p[-3] == 'p') || (p[-3] == 'P'))
                &&  ((p[-4] == '.') || (p[-4] == '.'))) {
                     if (!IM_IS_GS(img)) {
-                        nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not PGM!"));
+                        MSGLOG("Image is not PGM!");
+                        // nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not PGM!"));
                     }
                     return FORMAT_PNM;
         } else if (((p[-1] == 'w') || (p[-1] == 'W'))
@@ -434,7 +439,8 @@ static save_image_format_t imblib_parse_extension(image_t *img, const char *path
                &&  ((p[-3] == 'r') || (p[-3] == 'R'))
                &&  ((p[-4] == '.') || (p[-4] == '.'))) {
                     if (!IM_IS_BAYER(img)) {
-                        nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not BAYER!"));
+                        MSGLOG("Image is not BAYER!");
+                        // nlr_raise(mp_obj_new_exception_msg(&mp_type_OSError, "Image is not BAYER!"));
                     }
                     return FORMAT_RAW;
         }
@@ -443,289 +449,323 @@ static save_image_format_t imblib_parse_extension(image_t *img, const char *path
     return FORMAT_DONT_CARE;
 }
 
-bool imlib_read_geometry(mp_obj_t fp, image_t *img, const char *path, img_read_settings_t *rs)
-{
-    file_read_open_raise(fp, path);
-    char magic[2];
-    read_data(fp, &magic, 2);
-    file_close(fp);
+// bool imlib_read_geometry(mp_obj_t fp, image_t *img, const char *path, img_read_settings_t *rs)
+// {
+//     file_read_open_raise(fp, path);
+//     char magic[2];
+//     read_data(fp, &magic, 2);
+//     file_close(fp);
 
-    bool vflipped = false;
-    if ((magic[0]=='P')
-    && ((magic[1]=='2') || (magic[1]=='3')
-    ||  (magic[1]=='5') || (magic[1]=='6'))) { // PPM
-        rs->format = FORMAT_PNM;
-        file_read_open_raise(fp, path);
-        file_buffer_on(fp); // REMEMBER TO TURN THIS OFF LATER!
-        ppm_read_geometry(fp, img, path, &rs->ppm_rs);
-    } else if ((magic[0]=='B') && (magic[1]=='M')) { // BMP
-        rs->format = FORMAT_BMP;
-        file_read_open_raise(fp, path);
-        file_buffer_on(fp); // REMEMBER TO TURN THIS OFF LATER!
-        vflipped = bmp_read_geometry(fp, img, &rs->bmp_rs);
-    } else {
-        fs_unsupported_format(NULL);
-    }
-    imblib_parse_extension(img, path); // Enforce extension!
-    return vflipped;
-}
+//     bool vflipped = false;
+//     if ((magic[0]=='P')
+//     && ((magic[1]=='2') || (magic[1]=='3')
+//     ||  (magic[1]=='5') || (magic[1]=='6'))) { // PPM
+//         rs->format = FORMAT_PNM;
+//         file_read_open_raise(fp, path);
+//         file_buffer_on(fp); // REMEMBER TO TURN THIS OFF LATER!
+//         ppm_read_geometry(fp, img, path, &rs->ppm_rs);
+//     } else if ((magic[0]=='B') && (magic[1]=='M')) { // BMP
+//         rs->format = FORMAT_BMP;
+//         file_read_open_raise(fp, path);
+//         file_buffer_on(fp); // REMEMBER TO TURN THIS OFF LATER!
+//         vflipped = bmp_read_geometry(fp, img, &rs->bmp_rs);
+//     } else {
+//         fs_unsupported_format(NULL);
+//     }
+//     imblib_parse_extension(img, path); // Enforce extension!
+//     return vflipped;
+// }
 
-static void imlib_read_pixels(FIL *fp, image_t *img, int line_start, int line_end, img_read_settings_t *rs)
-{
-    switch (rs->format) {
-        case FORMAT_BMP:
-            bmp_read_pixels(fp, img, line_start, line_end, &rs->bmp_rs);
-            break;
-        case FORMAT_PNM:
-            ppm_read_pixels(fp, img, line_start, line_end, &rs->ppm_rs);
-            break;
-        default: // won't happen
-            break;
-    }
-}
+// static void imlib_read_pixels(FIL *fp, image_t *img, int line_start, int line_end, img_read_settings_t *rs)
+// {
+//     switch (rs->format) {
+//         case FORMAT_BMP:
+//             bmp_read_pixels(fp, img, line_start, line_end, &rs->bmp_rs);
+//             break;
+//         case FORMAT_PNM:
+//             ppm_read_pixels(fp, img, line_start, line_end, &rs->ppm_rs);
+//             break;
+//         default: // won't happen
+//             break;
+//     }
+// }
 
 void imlib_image_operation(image_t *img, const char *path, image_t *other, int scalar, line_op_t op, void *data)
 {
-    if (path) {
-        uint32_t size = fb_avail() / 2;
-        void *alloc = fb_alloc(size); // We have to do this before the read.
-        // This code reads a window of an image in at a time and then executes
-        // the line operation on each line in that window before moving to the
-        // next window. The vflipped part is here because BMP files can be saved
-        // vertically flipped resulting in us reading the image backwards.
-        FIL fp;
-        image_t temp;
-        img_read_settings_t rs;
-        bool vflipped = imlib_read_geometry(&fp, &temp, path, &rs);
-        if (!IM_EQUAL(img, &temp)) {
-            fs_not_equal(&fp);
-        }
-        // When processing vertically flipped images the read function will fill
-        // the window up from the bottom. The read function assumes that the
-        // window is equal to an image in size. However, since this is not the
-        // case we shrink the window size to how many lines we're buffering.
-        temp.pixels = alloc;
-        temp.h = (size / (temp.w * temp.bpp)); // round down
-        // This should never happen unless someone forgot to free.
-        if ((!temp.pixels) || (!temp.h)) {
-            nlr_raise(mp_obj_new_exception_msg(&mp_type_MemoryError,
-                                               "Not enough memory available!"));
-        }
-        for (int i=0; i<img->h; i+=temp.h) { // goes past end
-            int can_do = IM_MIN(temp.h, img->h-i);
-            imlib_read_pixels(&fp, &temp, 0, can_do, &rs);
-            for (int j=0; j<can_do; j++) {
-                if (!vflipped) {
-                    op(img, i+j, temp.pixels+(temp.w*temp.bpp*j), data, false);
-                } else {
-                    op(img, (img->h-i-can_do)+j, temp.pixels+(temp.w*temp.bpp*j), data, true);
-                }
-            }
-        }
-        file_buffer_off(&fp);
-        file_close(&fp);
-        fb_free();
-    } else if (other) {
-        if (!IM_EQUAL(img, other)) {
-            fs_not_equal(NULL);
-        }
-        switch (img->bpp) {
-            case IMAGE_BPP_BINARY: {
-                for (int i=0, ii=img->h; i<ii; i++) {
-                    op(img, i, IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(other, i), data, false);
-                }
-                break;
-            }
-            case IMAGE_BPP_GRAYSCALE: {
-                for (int i=0, ii=img->h; i<ii; i++) {
-                    op(img, i, IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(other, i), data, false);
-                }
-                break;
-            }
-            case IMAGE_BPP_RGB565: {
-                for (int i=0, ii=img->h; i<ii; i++) {
-                    op(img, i, IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(other, i), data, false);
-                }
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    } else {
-        switch(img->bpp) {
-            case IMAGE_BPP_BINARY: {
-                uint32_t *row_ptr = fb_alloc(IMAGE_BINARY_LINE_LEN_BYTES(img));
-
-                for (int i=0, ii=img->w; i<ii; i++) {
-                    IMAGE_PUT_BINARY_PIXEL_FAST(row_ptr, i, scalar);
-                }
-
-                for (int i=0, ii=img->h; i<ii; i++) {
-                    op(img, i, row_ptr, data, false);
-                }
-
-                fb_free();
-                break;
-            }
-            case IMAGE_BPP_GRAYSCALE: {
-                uint8_t *row_ptr = fb_alloc(IMAGE_GRAYSCALE_LINE_LEN_BYTES(img));
-
-                for (int i=0, ii=img->w; i<ii; i++) {
-                    IMAGE_PUT_GRAYSCALE_PIXEL_FAST(row_ptr, i, scalar);
-                }
-
-                for (int i=0, ii=img->h; i<ii; i++) {
-                    op(img, i, row_ptr, data, false);
-                }
-
-                fb_free();
-                break;
-            }
-            case IMAGE_BPP_RGB565: {
-                uint16_t *row_ptr = fb_alloc(IMAGE_RGB565_LINE_LEN_BYTES(img));
-
-                for (int i=0, ii=img->w; i<ii; i++) {
-                    IMAGE_PUT_RGB565_PIXEL_FAST(row_ptr, i, scalar);
-                }
-
-                for (int i=0, ii=img->h; i<ii; i++) {
-                    op(img, i, row_ptr, data, false);
-                }
-
-                fb_free();
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-}
-
-void imlib_load_image(image_t *img, const char *path, mp_obj_t file, uint8_t* buf, uint32_t buf_len)
-{
-    int err = 0;
-    char magic[2];
-    uint8_t data_type = 0; // 0: file path, 1: file obj, 2: buffer(bytes)
-
-    if(path)
-        data_type = 0;
-    else if(file)
-        data_type = 1;
-    else if(buf)
-        data_type = 2;
-    else
-        mp_raise_OSError(EINVAL);
-    if(data_type == 0)
+    if (path)
     {
-        file = vfs_internal_open(path,"rb", &err);
-        if(err != 0)
-            mp_raise_OSError(err);
-    }
-    if(data_type == 2)
-        memcpy(magic, buf, 2);
-    else
-    {
-        vfs_internal_read(file, magic, 2, &err);
-        if( err != 0)
-            mp_raise_OSError(err);
-        vfs_internal_seek(file,-2, SEEK_CUR, &err);
-        if( err != 0)
-        {
-            int tmp = err;
-            vfs_internal_close(file, &err);
-            mp_raise_OSError(tmp);
-        }
-    }
-    /*if ((magic[0]=='P')
-    && ((magic[1]=='2') || (magic[1]=='3')
-    ||  (magic[1]=='5') || (magic[1]=='6'))) { // PPM
-        ppm_read(img, path);
-    } else*/ if ((magic[0]=='B') && (magic[1]=='M')) { // BMP
-        if(data_type != 0)
-        {
-            mp_raise_msg(&mp_type_OSError, "Not support");
-        }
-        vfs_internal_close(file, &err);
-        bmp_read(img, path);
-    } else if ((magic[0]==0xFF) && (magic[1]==0xD8)) { // JPEG
-        // jpeg_read(img, path);
-        if(data_type == 2)
-        {
-            err = picojpeg_util_read(img, NULL, buf, buf_len, MAIN_FB()->w_max, MAIN_FB()->h_max);
-        }
-        else
-        {
-            err = picojpeg_util_read(img, file, NULL, 0, MAIN_FB()->w_max, MAIN_FB()->h_max);
-        }
-        if(data_type != 2)
-        {
-            int tmp;
-            if(data_type == 0)
-                vfs_internal_close(file, &tmp);
-            if( err != 0)
-            {
-                if(data_type == 1)
-                    vfs_internal_close(file, &tmp);
-                mp_raise_OSError(err);
-            }
-        }
-    } else {
-        int tmp;
-        if(data_type == 0)
-            vfs_internal_close(file, &tmp);
-        mp_raise_ValueError("format not supported");
-    }
-    if(data_type == 0)
-    {
-        imblib_parse_extension(img, path); // Enforce extension!
-    }
-}
-
-void imlib_save_image(image_t *img, const char *path, rectangle_t *roi, int quality)
-{
-    switch (imblib_parse_extension(img, path)) {
-        //TODO: 
-        case FORMAT_BMP:
-            bmp_write_subimg(img, path, roi);
-            break;
-        // case FORMAT_PNM:
-        //     ppm_write_subimg(img, path, roi);
-        //     break;
-        // case FORMAT_RAW: {
-        //     FIL fp;
-        //     file_write_open_raise(&fp, path);
-        //     write_data(&fp, img->pixels, img->w * img->h);
-        //     file_close(&fp);
-        //     break;
+        // uint32_t size = fb_avail() / 2;
+        // void *alloc = fb_alloc(size); // We have to do this before the read.
+        // // This code reads a window of an image in at a time and then executes
+        // // the line operation on each line in that window before moving to the
+        // // next window. The vflipped part is here because BMP files can be saved
+        // // vertically flipped resulting in us reading the image backwards.
+        // FIL fp;
+        // image_t temp;
+        // img_read_settings_t rs;
+        // bool vflipped = imlib_read_geometry(&fp, &temp, path, &rs);
+        // if (!IM_EQUAL(img, &temp))
+        // {
+        //     fs_not_equal(&fp);
         // }
-        case FORMAT_JPG:
-            jpeg_write(img, path, quality);
-            break;
-        // case FORMAT_DONT_CARE:
-        //     // Path doesn't have an extension.
-        //     if (IM_IS_JPEG(img)) {
-        //         char *new_path = strcat(strcpy(fb_alloc(strlen(path)+5), path), ".jpg");
-        //         jpeg_write(img, new_path, quality);
-        //         fb_free();
-        //     } else if (IM_IS_BAYER(img)) {
-        //         FIL fp;
-        //         char *new_path = strcat(strcpy(fb_alloc(strlen(path)+5), path), ".raw");
-        //         file_write_open_raise(&fp, new_path);
-        //         write_data(&fp, img->pixels, img->w * img->h);
-        //         file_close(&fp);
-        //         fb_free();
-        //     } else { // RGB or GS, save as BMP.
-        //         char *new_path = strcat(strcpy(fb_alloc(strlen(path)+5), path), ".bmp");
-        //         bmp_write_subimg(img, new_path, roi);
-        //         fb_free();
+        // // When processing vertically flipped images the read function will fill
+        // // the window up from the bottom. The read function assumes that the
+        // // window is equal to an image in size. However, since this is not the
+        // // case we shrink the window size to how many lines we're buffering.
+        // temp.pixels = alloc;
+        // temp.h = (size / (temp.w * temp.bpp)); // round down
+        // // This should never happen unless someone forgot to free.
+        // if ((!temp.pixels) || (!temp.h))
+        // {
+        //     MSGLOG("Not enough memory available!");
+        //     // nlr_raise(mp_obj_new_exception_msg(&mp_type_MemoryError,
+        //     //                                    "Not enough memory available!"));
+        // }
+        // for (int i = 0; i < img->h; i += temp.h)
+        // { // goes past end
+        //     int can_do = IM_MIN(temp.h, img->h - i);
+        //     imlib_read_pixels(&fp, &temp, 0, can_do, &rs);
+        //     for (int j = 0; j < can_do; j++)
+        //     {
+        //         if (!vflipped)
+        //         {
+        //             op(img, i + j, temp.pixels + (temp.w * temp.bpp * j), data, false);
+        //         }
+        //         else
+        //         {
+        //             op(img, (img->h - i - can_do) + j, temp.pixels + (temp.w * temp.bpp * j), data, true);
+        //         }
         //     }
-        //     break;
-        default:
+        // }
+        // file_buffer_off(&fp);
+        // file_close(&fp);
+        // fb_free();
+    }
+    else if (other)
+    {
+        if (!IM_EQUAL(img, other))
+        {
+            // fs_not_equal(NULL);
+            MSGLOG("different!\r\n");
+        }
+        switch (img->bpp)
+        {
+        case IMAGE_BPP_BINARY:
+        {
+            for (int i = 0, ii = img->h; i < ii; i++)
+            {
+                op(img, i, IMAGE_COMPUTE_BINARY_PIXEL_ROW_PTR(other, i), data, false);
+            }
             break;
+        }
+        case IMAGE_BPP_GRAYSCALE:
+        {
+            for (int i = 0, ii = img->h; i < ii; i++)
+            {
+                op(img, i, IMAGE_COMPUTE_GRAYSCALE_PIXEL_ROW_PTR(other, i), data, false);
+            }
+            break;
+        }
+        case IMAGE_BPP_RGB565:
+        {
+            for (int i = 0, ii = img->h; i < ii; i++)
+            {
+                op(img, i, IMAGE_COMPUTE_RGB565_PIXEL_ROW_PTR(other, i), data, false);
+            }
+            break;
+        }
+        default:
+        {
+            break;
+        }
+        }
+    }
+    else
+    {
+        switch (img->bpp)
+        {
+        case IMAGE_BPP_BINARY:
+        {
+            uint32_t *row_ptr = fb_alloc(IMAGE_BINARY_LINE_LEN_BYTES(img));
+
+            for (int i = 0, ii = img->w; i < ii; i++)
+            {
+                IMAGE_PUT_BINARY_PIXEL_FAST(row_ptr, i, scalar);
+            }
+
+            for (int i = 0, ii = img->h; i < ii; i++)
+            {
+                op(img, i, row_ptr, data, false);
+            }
+
+            fb_free();
+            break;
+        }
+        case IMAGE_BPP_GRAYSCALE:
+        {
+            uint8_t *row_ptr = fb_alloc(IMAGE_GRAYSCALE_LINE_LEN_BYTES(img));
+
+            for (int i = 0, ii = img->w; i < ii; i++)
+            {
+                IMAGE_PUT_GRAYSCALE_PIXEL_FAST(row_ptr, i, scalar);
+            }
+
+            for (int i = 0, ii = img->h; i < ii; i++)
+            {
+                op(img, i, row_ptr, data, false);
+            }
+
+            fb_free();
+            break;
+        }
+        case IMAGE_BPP_RGB565:
+        {
+            uint16_t *row_ptr = fb_alloc(IMAGE_RGB565_LINE_LEN_BYTES(img));
+
+            for (int i = 0, ii = img->w; i < ii; i++)
+            {
+                IMAGE_PUT_RGB565_PIXEL_FAST(row_ptr, i, scalar);
+            }
+
+            for (int i = 0, ii = img->h; i < ii; i++)
+            {
+                op(img, i, row_ptr, data, false);
+            }
+
+            fb_free();
+            break;
+        }
+        default:
+        {
+            break;
+        }
+        }
     }
 }
+
+// void imlib_load_image(image_t *img, const char *path, mp_obj_t file, uint8_t* buf, uint32_t buf_len)
+// {
+//     int err = 0;
+//     char magic[2];
+//     uint8_t data_type = 0; // 0: file path, 1: file obj, 2: buffer(bytes)
+
+//     if(path)
+//         data_type = 0;
+//     else if(file)
+//         data_type = 1;
+//     else if(buf)
+//         data_type = 2;
+//     else
+//         mp_raise_OSError(EINVAL);
+//     if(data_type == 0)
+//     {
+//         file = vfs_internal_open(path,"rb", &err);
+//         if(err != 0)
+//             mp_raise_OSError(err);
+//     }
+//     if(data_type == 2)
+//         memcpy(magic, buf, 2);
+//     else
+//     {
+//         vfs_internal_read(file, magic, 2, &err);
+//         if( err != 0)
+//             mp_raise_OSError(err);
+//         vfs_internal_seek(file,-2, SEEK_CUR, &err);
+//         if( err != 0)
+//         {
+//             int tmp = err;
+//             vfs_internal_close(file, &err);
+//             mp_raise_OSError(tmp);
+//         }
+//     }
+//     /*if ((magic[0]=='P')
+//     && ((magic[1]=='2') || (magic[1]=='3')
+//     ||  (magic[1]=='5') || (magic[1]=='6'))) { // PPM
+//         ppm_read(img, path);
+//     } else*/ if ((magic[0]=='B') && (magic[1]=='M')) { // BMP
+//         if(data_type != 0)
+//         {
+//             mp_raise_msg(&mp_type_OSError, "Not support");
+//         }
+//         vfs_internal_close(file, &err);
+//         bmp_read(img, path);
+//     } else if ((magic[0]==0xFF) && (magic[1]==0xD8)) { // JPEG
+//         // jpeg_read(img, path);
+//         if(data_type == 2)
+//         {
+//             err = picojpeg_util_read(img, NULL, buf, buf_len, MAIN_FB()->w_max, MAIN_FB()->h_max);
+//         }
+//         else
+//         {
+//             err = picojpeg_util_read(img, file, NULL, 0, MAIN_FB()->w_max, MAIN_FB()->h_max);
+//         }
+//         if(data_type != 2)
+//         {
+//             int tmp;
+//             if(data_type == 0)
+//                 vfs_internal_close(file, &tmp);
+//             if( err != 0)
+//             {
+//                 if(data_type == 1)
+//                     vfs_internal_close(file, &tmp);
+//                 mp_raise_OSError(err);
+//             }
+//         }
+//     } else {
+//         int tmp;
+//         if(data_type == 0)
+//             vfs_internal_close(file, &tmp);
+//         mp_raise_ValueError("format not supported");
+//     }
+//     if(data_type == 0)
+//     {
+//         imblib_parse_extension(img, path); // Enforce extension!
+//     }
+// }
+
+// void imlib_save_image(image_t *img, const char *path, rectangle_t *roi, int quality)
+// {
+//     switch (imblib_parse_extension(img, path)) {
+//         //TODO: 
+//         case FORMAT_BMP:
+//             bmp_write_subimg(img, path, roi);
+//             break;
+//         // case FORMAT_PNM:
+//         //     ppm_write_subimg(img, path, roi);
+//         //     break;
+//         // case FORMAT_RAW: {
+//         //     FIL fp;
+//         //     file_write_open_raise(&fp, path);
+//         //     write_data(&fp, img->pixels, img->w * img->h);
+//         //     file_close(&fp);
+//         //     break;
+//         // }
+//         case FORMAT_JPG:
+//             jpeg_write(img, path, quality);
+//             break;
+//         // case FORMAT_DONT_CARE:
+//         //     // Path doesn't have an extension.
+//         //     if (IM_IS_JPEG(img)) {
+//         //         char *new_path = strcat(strcpy(fb_alloc(strlen(path)+5), path), ".jpg");
+//         //         jpeg_write(img, new_path, quality);
+//         //         fb_free();
+//         //     } else if (IM_IS_BAYER(img)) {
+//         //         FIL fp;
+//         //         char *new_path = strcat(strcpy(fb_alloc(strlen(path)+5), path), ".raw");
+//         //         file_write_open_raise(&fp, new_path);
+//         //         write_data(&fp, img->pixels, img->w * img->h);
+//         //         file_close(&fp);
+//         //         fb_free();
+//         //     } else { // RGB or GS, save as BMP.
+//         //         char *new_path = strcat(strcpy(fb_alloc(strlen(path)+5), path), ".bmp");
+//         //         bmp_write_subimg(img, new_path, roi);
+//         //         fb_free();
+//         //     }
+//         //     break;
+//         default:
+//             break;
+//     }
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -917,24 +957,67 @@ int imlib_image_std(image_t *src)
 }
 
 static volatile uint8_t _ai_done_flag;
-static int kpu_done(void *ctx)
-{
-    _ai_done_flag = 1;
-    return 0;
-}
+// static int kpu_done(void *ctx)
+// {
+//     _ai_done_flag = 1;
+//     return 0;
+// }
+
+static uint32_t SMLAD(uint32_t x,uint32_t y,uint32_t sum)
+  {
+    return ((uint32_t)(((((int32_t)x << 16) >> 16) * (((int32_t)y << 16) >> 16)) +
+                       ((((int32_t)x      ) >> 16) * (((int32_t)y      ) >> 16)) +
+                       ( ((int32_t)sum    )                                  )   ));
+  }
+
+ 
 
 void imlib_sepconv3(image_t *img, const int8_t *krn, const float m, const int b)
 {
-	float krn_f[9];
-	kpu_task_t task;
-	
-	_ai_done_flag = 0;
-	krn_f[0]=(float)(krn[0]);krn_f[1]=(float)(krn[1]);krn_f[2]=(float)(krn[2]);
-	krn_f[3]=(float)(krn[3]);krn_f[4]=(float)(krn[4]);krn_f[5]=(float)(krn[5]);
-	krn_f[6]=(float)(krn[6]);krn_f[7]=(float)(krn[7]);krn_f[8]=(float)(krn[8]);
-	sipeed_conv_init(&task, img->w, img->h, 1, 1, krn_f);
-	sipeed_conv_run(&task, img->pixels, img->pixels, kpu_done);
-	while(!_ai_done_flag);
-    _ai_done_flag=0;
-	return;
+    int ksize = 3;
+    // TODO: Support RGB
+    int *buffer = fb_alloc(img->w * sizeof(*buffer) * 2);
+
+    // NOTE: This doesn't deal with borders right now. Adding if
+    // statements in the inner loop will slow it down significantly.
+    for (int y=0; y<img->h-ksize; y++) {
+        for (int x=0; x<img->w; x++) {
+            int acc=0;
+            //if (IM_X_INSIDE(img, x+k) && IM_Y_INSIDE(img, y+j))
+            acc = SMLAD(krn[0], IM_GET_GS_PIXEL(img, x, y + 0), acc);
+            acc = SMLAD(krn[1], IM_GET_GS_PIXEL(img, x, y + 1), acc);
+            acc = SMLAD(krn[2], IM_GET_GS_PIXEL(img, x, y + 2), acc);
+            buffer[((y%2)*img->w) + x] = acc;
+        }
+        if (y > 0) {
+            // flush buffer
+            for (int x=0; x<img->w-ksize; x++) {
+                int acc = 0;
+                acc = SMLAD(krn[0], buffer[((y-1)%2) * img->w + x + 0], acc);
+                acc = SMLAD(krn[1], buffer[((y-1)%2) * img->w + x + 1], acc);
+                acc = SMLAD(krn[2], buffer[((y-1)%2) * img->w + x + 2], acc);
+                acc = (acc * m) + b; // scale, offset, and clamp
+                acc = IM_MAX(IM_MIN(acc, IM_MAX_GS), 0);
+                IM_SET_GS_PIXEL(img, (x+1), (y), acc);
+            }
+        }
+    }
+    fb_free();
 }
+
+
+// void imlib_sepconv3(image_t *img, const int8_t *krn, const float m, const int b)
+// {
+// 	float krn_f[9];
+// 	kpu_task_t task;
+	
+// 	_ai_done_flag = 0;
+// 	krn_f[0]=(float)(krn[0]);krn_f[1]=(float)(krn[1]);krn_f[2]=(float)(krn[2]);
+// 	krn_f[3]=(float)(krn[3]);krn_f[4]=(float)(krn[4]);krn_f[5]=(float)(krn[5]);
+// 	krn_f[6]=(float)(krn[6]);krn_f[7]=(float)(krn[7]);krn_f[8]=(float)(krn[8]);
+// 	sipeed_conv_init(&task, img->w, img->h, 1, 1, krn_f);
+// 	sipeed_conv_run(&task, img->pixels, img->pixels, kpu_done);
+// 	while(!_ai_done_flag);
+//     _ai_done_flag=0;
+// 	return;
+// }

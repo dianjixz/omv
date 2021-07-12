@@ -41,7 +41,7 @@ int gc2145_reset(sensor_t *sensor)
             mp_hal_delay_ms(sensor_gc2145_default_regs[index][1]);
             continue;
         }
-        // mp_printf(&mp_plat_print, "0x12,0x%02x,0x%02x,\r\n", sensor_gc2145_default_regs[index][0], sensor_gc2145_default_regs[index][1]);//debug
+        // MSGLOG("0x12,0x%02x,0x%02x,\r\n", sensor_gc2145_default_regs[index][0], sensor_gc2145_default_regs[index][1]);//debug
         cambus_writeb(GC2145_ADDR, sensor_gc2145_default_regs[index][0], sensor_gc2145_default_regs[index][1]);
         // mp_hal_delay_ms(1);
     }

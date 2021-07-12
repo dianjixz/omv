@@ -764,6 +764,13 @@ static int line_intersect(const struct quirc_point *p0,
 
     return 1;
 }
+// void rectangle_init(rectangle_t *ptr, int x, int y, int w, int h)
+// {
+//     ptr->x = x;
+//     ptr->y = y;
+//     ptr->w = w;
+//     ptr->h = h;
+// }
 
 static void perspective_setup(float *c,
                               const struct quirc_point *rect,
@@ -880,7 +887,7 @@ static void flood_fill_seed(struct quirc *q, int x, int y, int from, int to,
                             context.l = left;
                             context.r = right;
                             lifo_enqueue(&lifo, &context);
-							//mp_printf(&mp_plat_print, "#x=%x,y=%d;x1=%d,y1=%d\n",x,y,i,y-1);
+							//MSGLOG("#x=%x,y=%d;x1=%d,y1=%d\n",x,y,i,y-1);
                             x = i;
                             y = y - 1;
                             recurse = true;
@@ -902,7 +909,7 @@ static void flood_fill_seed(struct quirc *q, int x, int y, int from, int to,
                             context.l = left;
                             context.r = right;
                             lifo_enqueue(&lifo, &context);
-							//mp_printf(&mp_plat_print, "#x=%x,y=%d;x1=%d,y1=%d\n",x,y,i,y+1);
+							//MSGLOG("#x=%x,y=%d;x1=%d,y1=%d\n",x,y,i,y+1);
                             x = i;
                             y = y + 1;
                             recurse = true;
@@ -925,7 +932,7 @@ static void flood_fill_seed(struct quirc *q, int x, int y, int from, int to,
             y = context.y;
             left = context.l;
             right = context.r;
-			//mp_printf(&mp_plat_print, "#deq: x=%x,y=%d\n",x,y);
+			//MSGLOG("#deq: x=%x,y=%d\n",x,y);
         }	//找到相同from，break到这外面
     }
 }
@@ -1543,7 +1550,7 @@ static int fitness_all(const struct quirc *q, int index)
         for (j = 1; j < ap_count; j++)
             score += fitness_apat(q, index,
                     info->apat[i], info->apat[j]);
-//mp_printf(&mp_plat_print, "##score=%d\n",score);
+//MSGLOG("##score=%d\n",score);
     return score;
 }
 

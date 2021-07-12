@@ -1,0 +1,31 @@
+{
+	"files.associations": {
+		"framebuffer.h": "c",
+		"imlib.h": "c",
+		"imlib_config.h": "c",
+		"stdint.h": "c",
+		"string.h": "c",
+		"imdefs.h": "c",
+		"fb_alloc.h": "c",
+		"limits.h": "c",
+		"float.h": "c",
+		"math.h": "c",
+		"umm_malloc.h": "c",
+		"xalloc.h": "c",
+		"array.h": "c",
+		"fmath.h": "c",
+		"collections.h": "c",
+		"stddef.h": "c",
+		"font.h": "c",
+		"vfs_wrapper.h": "c",
+		"array": "c",
+		"*.tcc": "c",
+		"string": "c",
+		"string_view": "c",
+		"list": "c",
+		"system_error": "c",
+		"common.h": "c",
+		"picojpeg_util.h": "c",
+		"cstdio": "c"
+	}
+}

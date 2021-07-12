@@ -250,6 +250,23 @@ typedef struct _py_image_obj_t {
     image_t _cobj;
 } py_image_obj_t MICROPY_OBJ_BASE_ALIGNMENT;
 
+/****************/
+
+// do { 
+//     __typeof__ (img_obj) _a = (img_obj);
+//     __typeof__ (&py_image_type) _b = (&py_image_type);
+//     if (!MP_OBJ_IS_TYPE(_a, _b))
+//     {
+//         nlr_raise(mp_obj_new_exception_msg_varg( &mp_type_TypeError, "Can't convert %s to %s", mp_obj_get_type_str(_a), mp_obj_get_type_str(_b)));
+//     }
+//  } while(0)
+
+
+
+/**************************/
+
+
+
 void *py_image_cobj(mp_obj_t img_obj)
 {
     PY_ASSERT_TYPE(img_obj, &py_image_type);
@@ -854,7 +871,7 @@ static mp_obj_t py_image_to_grayscale(size_t n_args, const mp_obj_t *args, mp_ma
     image_t *arg_img = py_helper_arg_to_image_mutable(args[0]);
     bool copy = py_helper_keyword_int(n_args, args, 1, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_copy), false);
 
-    mp_printf(&mp_plat_print, "nihao ,can you see me four?\r\n");
+    MSGLOG("nihao ,can you see me four?\r\n");
     image_t out;
     out.w = arg_img->w;
     out.h = arg_img->h;
@@ -914,7 +931,7 @@ static mp_obj_t py_image_to_rgb565(size_t n_args, const mp_obj_t *args, mp_map_t
     image_t *arg_img = py_helper_arg_to_image_mutable(args[0]);
     bool copy = py_helper_keyword_int(n_args, args, 1, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_copy), false);
 
-    mp_printf(&mp_plat_print, "nihao ,can you see me to_rgb565 five?\r\n");
+    MSGLOG("nihao ,can you see me to_rgb565 five?\r\n");
     image_t out;
     out.w = arg_img->w;
     out.h = arg_img->h;
@@ -3909,7 +3926,11 @@ static mp_obj_t py_image_get_regression(size_t n_args, const mp_obj_t *args, mp_
 
     list_t thresholds;
     list_init(&thresholds, sizeof(color_thresholds_list_lnk_data_t));
+
+
+
     py_helper_arg_to_thresholds(args[1], &thresholds);
+
     if (!list_size(&thresholds)) return mp_const_none;
     bool invert = py_helper_keyword_int(n_args, args, 2, kw_args, MP_OBJ_NEW_QSTR(MP_QSTR_invert), false);
 
@@ -5580,12 +5601,12 @@ static mp_obj_t py_image_dump_roi(size_t n_args, const mp_obj_t *args, mp_map_t 
 	{
 		for(x=x0;x<x0+w;x++) //TODO:pixel format
 		{
-			mp_printf(&mp_plat_print, "0x%02x 0x%02x; ",ptr[2*width*y+2*x], ptr[2*width*y+2*x+1]);
-			if((x-x0)%8==7) mp_printf(&mp_plat_print, "\n");
+			MSGLOG("0x%02x 0x%02x; ",ptr[2*width*y+2*x], ptr[2*width*y+2*x+1]);
+			if((x-x0)%8==7) MSGLOG("\n");
 		}
-		mp_printf(&mp_plat_print, "\n");
+		MSGLOG("\n");
 	}
-	mp_printf(&mp_plat_print, "\n");
+	MSGLOG("\n");
 	return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(py_image_dump_roi_obj, 2, py_image_dump_roi);
@@ -5613,7 +5634,7 @@ static mp_obj_t py_image_conv3(size_t n_args, const mp_obj_t *args, mp_map_t *kw
 		}
 	} else 
 	{
-		mp_printf(&mp_plat_print, "please input 9 kern parm!\n");
+		MSGLOG("please input 9 kern parm!\n");
 		return mp_const_none;
 	}
 	imlib_conv3(arg_img, krn);
@@ -5773,7 +5794,7 @@ static mp_obj_t py_image_resize(mp_obj_t img_obj, mp_obj_t w_obj, mp_obj_t h_obj
 		break;
 	}
 	default:
-		mp_printf(&mp_plat_print, "only support grayscale, 565 zoom out now\r\n");
+		MSGLOG("only support grayscale, 565 zoom out now\r\n");
 		return mp_const_none;
 		break;
 	}
@@ -5821,7 +5842,7 @@ static mp_obj_t py_image_pix_to_ai(mp_obj_t img_obj)
 		return mp_const_none;
 	}
 	default:
-		mp_printf(&mp_plat_print, "only support grayscale now\r\n");
+		MSGLOG("only support grayscale now\r\n");
 		return mp_const_none;
 		break;
 	}
@@ -5859,7 +5880,7 @@ static mp_obj_t py_image_ai_to_pix(mp_obj_t img_obj)
 		return mp_const_none;
 	}
 	default:
-		mp_printf(&mp_plat_print, "only support grayscale now\r\n");
+		MSGLOG("only support grayscale now\r\n");
 		return mp_const_none;
 	}
 }
@@ -5895,7 +5916,7 @@ static mp_obj_t py_image_strech_char(mp_obj_t img_obj, mp_obj_t de_dark_obj)
 		// dx=sx2/w/h-(sx*sx/w/w/h/h);
 		// stdx=(int)sqrt(dx);
 		gate=ex;//+stdx/8;
-		//mp_printf(&mp_plat_print, "ex=%d,dx=%d,stdx=%d,gate=%d,graymax=%d\r\n",ex,dx,stdx,gate,graymax);
+		//MSGLOG("ex=%d,dx=%d,stdx=%d,gate=%d,graymax=%d\r\n",ex,dx,stdx,gate,graymax);
 		for(index=0; index < w*h; index++)
 		{
 			x=index%w;
@@ -5911,7 +5932,7 @@ static mp_obj_t py_image_strech_char(mp_obj_t img_obj, mp_obj_t de_dark_obj)
 		break;
 	}
 	default:
-		mp_printf(&mp_plat_print, "only support grayscale now\r\n");
+		MSGLOG("only support grayscale now\r\n");
 		return mp_const_none;
 		break;
 	}
@@ -5923,7 +5944,7 @@ static float min(uint8_t* data, uint16_t x, uint16_t y)
 {
 	int i,j;
 	float m=data[x+1];
-	//mp_printf(&mp_plat_print, "#m=%d ",m);
+	//MSGLOG("#m=%d ",m);
 	for(j=1;j<y-1;j++)
 	{
 		for(i=1;i<x-1;i++)
@@ -5931,7 +5952,7 @@ static float min(uint8_t* data, uint16_t x, uint16_t y)
 			if(data[j*x+i]<m){m = data[j*x+i];}
 		}
 	}
-	//mp_printf(&mp_plat_print, "\r\nmin m=%d ",m);
+	//MSGLOG("\r\nmin m=%d ",m);
 	return m;
 }
 
@@ -5939,7 +5960,7 @@ static float max(uint8_t* data, uint16_t x, uint16_t y)
 {
 	int i,j;
 	float m=data[x+1];
-	//mp_printf(&mp_plat_print, "#m=%d ",m);
+	//MSGLOG("#m=%d ",m);
 	for(j=1;j<y-1;j++)
 	{
 		for(i=1;i<x-1;i++)
@@ -5947,7 +5968,7 @@ static float max(uint8_t* data, uint16_t x, uint16_t y)
 			if(data[j*x+i]>m){m = data[j*x+i];}
 		}
 	}
-	//mp_printf(&mp_plat_print, "\r\nmax m=%d ",m);
+	//MSGLOG("\r\nmax m=%d ",m);
 	return m;
 }
 
@@ -5970,7 +5991,7 @@ static mp_obj_t py_image_stretch(mp_obj_t img_obj, mp_obj_t min_obj, mp_obj_t ma
 		uint8_t* data = img->pixels;
 		if(max0==min0) return mp_const_none;	//can't stretch
 		scale = (to_max-to_min)/(max0-min0);
-		//mp_printf(&mp_plat_print, "min0:%d,max0:%d,s:%f\r\n",min0,max0,scale);
+		//MSGLOG("min0:%d,max0:%d,s:%f\r\n",min0,max0,scale);
 		if(scale > MAX_SCALE) scale = MAX_SCALE;
 		//TODO: optimize linear
 		for(y=0;y<h;y++)
@@ -5984,7 +6005,7 @@ static mp_obj_t py_image_stretch(mp_obj_t img_obj, mp_obj_t min_obj, mp_obj_t ma
 		break;
 	}
 	default:
-		mp_printf(&mp_plat_print, "only support grayscale now\r\n");
+		MSGLOG("only support grayscale now\r\n");
 		return mp_const_none;
 		break;
 	}
@@ -6679,7 +6700,7 @@ mp_obj_t py_image_rgb_to_grayscale(mp_obj_t tuple)
 
     simple_color_t rgb_color, grayscale_color;
 
-    mp_printf(&mp_plat_print, "nihao ,can you see me two?\r\n");
+    MSGLOG("nihao ,can you see me two?\r\n");
     rgb_color.red = mp_obj_get_int(rgb[0]);
     rgb_color.green = mp_obj_get_int(rgb[1]);
     rgb_color.blue = mp_obj_get_int(rgb[2]);
@@ -7058,9 +7079,9 @@ int py_image_descriptor_from_roi(image_t *img, const char *path, rectangle_t *ro
     mp_obj_t fp;
     FRESULT res = FR_OK;
 
-    mp_printf(&mp_plat_print, "Save Descriptor: ROI(%d %d %d %d)\n", roi->x, roi->y, roi->w, roi->h);
+    MSGLOG("Save Descriptor: ROI(%d %d %d %d)\n", roi->x, roi->y, roi->w, roi->h);
     array_t *kpts = orb_find_keypoints(img, false, 20, 1.5f, 100, CORNER_AGAST, roi);
-    mp_printf(&mp_plat_print, "Save Descriptor: KPTS(%d)\n", array_length(kpts));
+    MSGLOG("Save Descriptor: KPTS(%d)\n", array_length(kpts));
 
     if (array_length(kpts)) {
         if ((res = file_write_open(&fp, path)) == FR_OK) {

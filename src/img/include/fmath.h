@@ -14,9 +14,10 @@
 
 static inline float fast_sqrtf(float x) 
 {
-	//return sqrtf(x);
-	asm ("fsqrt.s %0, %1" : "=f" (x) : "f" (x));
-	return x;
+    //可以作为优化函数
+	return sqrtf(x);
+	// asm ("fsqrt.s %0, %1" : "=f" (x) : "f" (x));
+	// return x;
 }
 static inline int fast_floorf(float x)
 {

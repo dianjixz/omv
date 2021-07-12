@@ -2,7 +2,7 @@
 #include "imlib.h"
 #include "xalloc.h"
 #include "fb_alloc.h"
-#include "gc.h"
+// #include "gc.h"
 
 #ifdef IMLIB_ENABLE_FAST
 
