@@ -75,7 +75,15 @@
 # # imga = Image.fromarray(img_ar)
 # # imga.show()
 
-import image_new
-exit()
+import image
+from PIL import Image
+
+
+img = Image.open("/home/nihao/nihao.png").convert('L') 
+print(image.find_qr(img.tobytes(),img.width,img.height))
+
+
+
+
 
 

@@ -7,6 +7,7 @@
 
 #include "conversion.h"
 
+
 // #define pyNULL Py_INCREF(Py_None), Py_None
 
 
@@ -395,9 +396,64 @@ py_find_blobs(PyObject *self, PyObject *args, PyObject* keywds)
 	return thr;
 }
 
+char* _mf_qr_scan_pic(uint8_t *pic, uint16_t w, uint16_t h);
 
 
 
+
+
+static PyObject *
+python_find_qr(PyObject *self, PyObject *args, PyObject* keywds)
+{
+		
+	image_t qr_img; 
+	PyObject *img_bytes;
+	int w,h;
+	static char *kwlist[] = {"img_bytes","w","h", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "Oii", kwlist,
+                              &img_bytes,&w,&h)) return NULL;
+	
+	if(!PyBytes_Check(img_bytes)) return NULL;
+	uint8_t *bys;
+	
+	bys = PyBytes_AsString(img_bytes);
+	qr_img.data = (uint8_t *)malloc(w * h);
+	
+	memcpy(qr_img.data,bys,w * h);
+
+
+
+	// rgb888_to_rgb565(bys,w,h,qr_img.data);
+	// uint8_t cha;
+	// unsigned short *nihao;
+	// nihao = (unsigned short *)qr_img.data;
+	// for (int i = 0;i<w*h;i++)
+	// {
+	// 	cha = nihao[i];
+	// 	nihao[i] = nihao[i] >> 8;
+	// 	nihao[i] |= cha << 8;
+	// }
+	arg_img.h = h;
+	arg_img.w = w;
+	arg_img.bpp = IMAGE_BPP_RGB565;
+
+	char *datas;
+	datas = _mf_qr_scan_pic(qr_img.data,w,h);
+
+
+	if(datas!=NULL)
+	{
+		PyObject *ret = PyBytes_FromStringAndSize(datas,strlen(datas));
+		free(datas);
+		free(qr_img.data);
+		return ret;
+	}
+	else
+	{
+		free(qr_img.data);
+		return PyBytes_FromFormat("no qr");
+	}
+}
 
 
 
@@ -425,6 +481,7 @@ static PyMethodDef imageMethods[] = {
 	{"img_back_rgb888",  (PyCFunction)py_img_back_rgb888, METH_VARARGS, "back an rgb888 img !"},
 	{"draw_line",  (PyCFunction)py_draw_line, METH_VARARGS | METH_KEYWORDS, "img draw line"},
 	{"draw_rectangle",  (PyCFunction)py_draw_rectangle, METH_VARARGS | METH_KEYWORDS, "img draw rectangle"},
+	{"find_qr",  (PyCFunction)python_find_qr, METH_VARARGS | METH_KEYWORDS, "img draw rectangle"},
 
 
 
@@ -448,6 +505,109 @@ PyInit_image(void)
 {
     return PyModule_Create(&spammodule);
 }
+
+
+
+
+
+
+#include "zbar.h"
+
+
+
+
+
+
+
+char* _mf_qr_scan_pic(uint8_t *pic, uint16_t w, uint16_t h )
+{
+    /* 先申请内存，如果失败则直接返回 */
+    // uint8_t *gray = malloc(w * h);
+    // if (!gray)
+    // {
+    //     printk("malloc failed %s:%d\r\n", __func__, __LINE__);
+    //     return 0;
+    // }
+
+    /* 转换图像的字节序 */
+    // if(convert) qrcode_convert_order(pic,w,h);
+    // /* 将图像转换为灰度 */
+    // qrcode_convert_to_gray(pic, w, h, gray);
+
+    /* 开始调用Zbar进行扫码 */
+    /* create a reader */
+    zbar_image_scanner_t *scanner = zbar_image_scanner_create();
+    /* configure the reader */
+    zbar_image_scanner_set_config(scanner, 0, ZBAR_CFG_ENABLE, 1);
+    /* wrap image data */
+    zbar_image_t *image = zbar_image_create();
+    zbar_image_set_format(image, *(int *)"Y800");
+    zbar_image_set_size(image, w, h);
+    zbar_image_set_data(image, pic, w * h, NULL); //zbar_image_free_data
+    /* scan the image for barcodes */
+    int qrcode_num = zbar_scan_image(scanner, image);
+    /* extract results */
+    const zbar_symbol_t *symbol = zbar_image_first_symbol(image);
+	char *dats;
+	char *datk;
+	size_t dalin = 0;
+
+
+    /* 如果有多个二维码，会把最后一个结果返回 */
+    for (; symbol; symbol = zbar_symbol_next(symbol))
+    {
+        /* do something useful with results */
+        zbar_symbol_type_t typ = zbar_symbol_get_type(symbol);
+        const char *data = zbar_symbol_get_data(symbol);
+        size_t len = strlen(data);
+        printf("\r\ndecoded symbol: %s, content: \"%s\", len = %ld\r\n", zbar_get_symbol_name(typ), data, len);
+		dats = data;
+		dalin = len;
+        // /* 拷贝到结果 */
+        // if (len < 8896)
+        // {
+        //     memcpy(qrcode, data, len);
+        //     qrcode[len] = 0;
+        // }
+        // else
+        // {
+        //     /* 这里溢出了,就不进行拷贝 */
+        //     qrcode_num = 0;
+        // }
+    }
+	if(dalin == 0)
+	{
+		zbar_image_destroy(image);
+    	zbar_image_scanner_destroy(scanner);
+		return NULL;
+	}
+
+	printf("da len:%d\r\n",dalin);
+	datk = (char*)malloc(dalin + 1);
+	memcpy(datk,dats,dalin);
+	datk[dalin] = '\0';
+
+    /* clean up */
+    zbar_image_destroy(image);
+    zbar_image_scanner_destroy(scanner);
+    // if(convert) qrcode_convert_order(pic,w,h);
+	
+
+    return datk;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

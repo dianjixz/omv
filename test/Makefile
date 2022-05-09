@@ -214,7 +214,8 @@
 
 CFLAGS=  
 LIBS = -lm
-CC=gcc
+# CC=gcc
+CC=$(vgcc)
 # OBJDIR=./build
 project=./libimg.so
 # C_SRC = $(wildcard *.c)  
@@ -262,7 +263,7 @@ C_SRC += ../src/img/apriltag.c
 C_SRC += ../src/img/affine.c
 C_SRC += ../src/array.c
 C_SRC += ../src/umm_malloc.c
-C_SRC +=
+C_SRC += 
 C_SRC +=
 C_SRC +=
 C_SRC +=
@@ -274,7 +275,7 @@ C_SRC += ../src/img/kmeans.c
 
 INCLUDE =  -I ../src/img/include -I ../src/include -I ./
 
-LDFLAGS += -fPIC -shared
+LDFLAGS += -fPIC -shared -L/opt/v831/usr/lib -L/opt/v831/lib -L/opt/v831/toolchain-sunxi-musl/toolchain/usr/lib -L/opt/v831/toolchain-sunxi-musl/toolchain/lib
 CFLAGS += -fPIC -Wall
 
 
@@ -287,7 +288,7 @@ CPP_SRC =
 CPP_OBJ =  
 
 $(project): $(C_OBJ)
-	$(CC) $(LDFLAGS) -o $@ $(notdir $(C_OBJ)) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(notdir $(C_OBJ)) $(LIBS) 
 	make clean_o
 
 %.o:%.c
